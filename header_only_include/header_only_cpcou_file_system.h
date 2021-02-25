@@ -3,15 +3,14 @@
 #define Included_header_only_cpcou_file_system_h
 #ifdef __linux__
 #include<dirent.h>
-#include<sys/stat.h>
 #include<unistd.h>
 #elif defined _WIN32
-#include<fileapi.h>
-#include<winbase.h>
+#include<windows.h>
 #endif
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<sys/stat.h>
 #include<cpcou_file_system.h>
 
 /**
@@ -43,6 +42,33 @@ char **cpcou_folder_insides(const char *name)
 	}
 	closedir(dir);
 #elif defined _WIN32
+	size_t namlen = strlen(name);
+	char *wcsearch = malloc(namlen + 3);
+	strcpy(wcsearch, name);
+	wcsearch[namlen] = '\\';
+	wcsearch[namlen + 1] = '*';
+	wcsearch[namlen + 2] = '\0';
+	WIN32_FIND_DATA dat;
+	HANDLE fh = FindFirstFileA(wcsearch, &dat);
+	if(fh != INVALID_HANDLE_VALUE)
+	{
+		intmp[lsz] = malloc(1 + strlen(dat.cFileName));;
+		strcpy(intmp[lsz], dat.cFileName);
+		++lsz;
+		while(FindNextFileA(fh, &dat))
+		{
+			if(lsz == capa)
+			{
+				intmp = realloc(intmp, (capa + ocapa) * sizeof(char*));
+				capa += ocapa;
+				ocapa = lsz;
+			}
+			intmp[lsz] = malloc(1 + strlen(dat.cFileName));;
+			strcpy(intmp[lsz], dat.cFileName);
+			++lsz;
+		}
+	}
+	free(wcsearch);
 #endif
 	size_t totlen = 0;
 	for(size_t i = 0; i < lsz; ++i)
@@ -96,6 +122,7 @@ int cpcou_delete_file(const char *file)
 	else
 		return unlink(file);
 #elif defined _WIN32
+	return DeleteFileA(file) == 0 ? -1 : 0;
 #endif
 }
 
@@ -104,17 +131,17 @@ int cpcou_delete_file(const char *file)
  */
 long long unsigned cpcou_file_size(const char *name)
 {
-#ifdef __linux__
+//#ifdef __linux__
 	struct stat fstats;
 	stat(name, &fstats);
 	return fstats.st_size;
-#elif defined _WIN32
-	HANDLE fhand = CreateFileA(GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+//#elif defined _WIN32
+	/*HANDLE fhand = CreateFileA(name, GENERIC_READ, FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	DWORD hi, lo = GetFileSize(fhand, &hi);
 	long long unsigned sz = hi;
 	sz = sz << 32 + lo;
-	return sz;
-#endif
+	return sz;*/
+//#endif
 }
 
 /**
@@ -123,14 +150,12 @@ long long unsigned cpcou_file_size(const char *name)
 int cpcou_file_type(const char *name)
 {
 	int tp;
-#ifdef __linux__
 	struct stat fstats;
 	stat(name, &fstats);
 	if((fstats.st_mode & S_IFMT) == S_IFDIR)
 		tp = CPCOU_DIRECTORY;
 	else
 		tp = CPCOU_FILE;
-#endif
 	return tp;
 }
 
