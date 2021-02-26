@@ -114,15 +114,72 @@ int cpcou_move_file(const char *old, const char *new)
  */
 int cpcou_delete_file(const char *file)
 {
-#ifdef __linux__
 	if(cpcou_file_type(file) == CPCOU_DIRECTORY)
 	{
+		int res = 0;
+		char **stuff;
+		size_t ssz = 0, ocapa = 3, capa = 5;
+		char **stack = malloc(capa * sizeof(char*));
+		stack[ssz++] = (char*)file;
+		char *curr;
+		size_t currlen;
+		while(ssz)
+		{
+			--ssz;
+			curr = stack[ssz];
+			if(cpcou_file_type(curr) == CPCOU_DIRECTORY)
+			{
+				stuff = cpcou_folder_insides(curr);
+				currlen = strlen(curr);
+				if(*stuff == NULL)
+#ifdef __linux__
+					rmdir(curr);
+#elif defined _WIN32
+					RemoveDirectoryA(curr);
+#endif
+				else
+				{
+					stack[ssz] = malloc(currlen + 1);
+					strcpy(stack[ssz], curr);
+					++ssz;
+					for(char **it = stuff; *it != NULL; ++it)
+					{
+						if(ssz == capa)
+						{
+							capa += ocapa;
+							ocapa = ssz;
+							stack = realloc(stack, capa * sizeof(char*));
+						}
+						stack[ssz] = malloc(currlen + strlen(*it) + 2);
+						strcpy(stack[ssz], curr);
+#ifdef __linux__
+						stack[ssz][currlen] = '/';
+#elif defined _WIN32
+						stack[ssz][currlen] = '\\';
+#endif
+						strcpy(stack[ssz] + currlen + 1, *it);
+						++ssz;
+					}
+				}
+				free(stuff);
+			}
+			else
+#ifdef __linux__
+				res += unlink(curr);
+#elif defined _WIN32
+				res += DeleteFileA(curr) == 0 ? -1 : 0;
+#endif
+			if(curr != file)
+				free(curr);
+		}
+		free(stack);
 		return 0;
 	}
 	else
+#ifdef __linux__
 		return unlink(file);
 #elif defined _WIN32
-	return DeleteFileA(file) == 0 ? -1 : 0;
+		return DeleteFileA(file) == 0 ? -1 : 0;
 #endif
 }
 
