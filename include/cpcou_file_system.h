@@ -3,6 +3,7 @@
 #define Included_cpcou_file_system_h
 #define CPCOU_FILE 997
 #define CPCOU_DIRECTORY 998
+#include<time.h>
 
 /**
  * Gets what is inside a folder, returned pointer will be heap allocated
@@ -21,6 +22,26 @@ int cpcou_move_file(const char *old, const char *new);
  * Deletes a file or a directory
  */
 int cpcou_delete_file(const char *file);
+
+/**
+ * Gets the last access time, in milliseconds since epoch
+ */
+time_t cpcou_last_access(const char *name);
+
+/**
+ * Gets the last modify time
+ */
+time_t cpcou_last_modify(const char *name);
+
+/**
+ * Gets the last status change time.
+ */
+time_t cpcou_last_stchange(const char *name);
+
+/**
+ * Gets the creation time
+ */
+time_t cpcou_create_time(const char *name);
 
 /**
  * Gets the size of a file, in bytes

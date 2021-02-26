@@ -127,6 +127,82 @@ int cpcou_delete_file(const char *file)
 }
 
 /**
+ * Gets the last access time in milliseconds since epoch
+ */
+time_t cpcou_last_access(const char *name)
+{
+#ifdef __linux__
+	struct stat fstats;
+	stat(name, &fstats);
+	// linux kernel 2.6 has been around since 2004, please update to use the newer features
+	return fstats.st_atim.tv_sec * 1000 + fstats.st_atim.tv_nsec / 1000000;
+#elif defined _WIN32
+	WIN32_FIND_DATA dat;
+	FindFirstFileA(name, &dat);
+	LARGE_INTEGER num;
+	num.u.LowPart = dat.ftLastAccessTime.dwLowDateTime;
+	num.u.HighPart = dat.ftLastAccessTime.dwHighDateTime;
+	num.QuadPart -= 116444736000000000;
+	return num.QuadPart / 10000;
+#endif
+}
+
+/**
+ * Gets the last modify time in milliseconds since epoch
+ */
+time_t cpcou_last_modify(const char *name)
+{
+#ifdef __linux__
+	struct stat fstats;
+	stat(name, &fstats);
+	// linux kernel 2.6 has been around since 2004, please update to use the newer features
+	return fstats.st_mtim.tv_sec * 1000 + fstats.st_mtim.tv_nsec / 1000000;
+#elif defined _WIN32
+	WIN32_FIND_DATA dat;
+	FindFirstFileA(name, &dat);
+	LARGE_INTEGER num;
+	num.u.LowPart = dat.ftLastWriteTime.dwLowDateTime;
+	num.u.HighPart = dat.ftLastWriteTime.dwHighDateTime;
+	num.QuadPart -= 116444736000000000;
+	return num.QuadPart / 10000;
+#endif
+}
+
+/**
+ * Gets the last status change time in milliseconds since epoch
+ * Only for linux
+ */
+time_t cpcou_last_stchange(const char *name)
+{
+#ifdef __linux__
+	struct stat fstats;
+	stat(name, &fstats);
+	// linux kernel 2.6 has been around since 2004, please update to use the newer features
+	return fstats.st_ctim.tv_sec * 1000 + fstats.st_ctim.tv_nsec / 1000000;
+#else
+	return-1;
+#endif
+}
+
+/**
+ * Gets the creation time of a file in milliseconds since epoch
+ */
+time_t cpcou_create_time(const char *name)
+{
+#ifdef _WIN32
+	WIN32_FIND_DATA dat;
+	FindFirstFileA(name, &dat);
+	LARGE_INTEGER num;
+	num.u.LowPart = dat.ftCreationTime.dwLowDateTime;
+	num.u.HighPart = dat.ftCreationTime.dwHighDateTime;
+	num.QuadPart -= 116444736000000000;
+	return num.QuadPart / 10000;
+#else
+	return-1;
+#endif
+}
+
+/**
  * Gets the size of a file, in bytes
  */
 long long unsigned cpcou_file_size(const char *name)
