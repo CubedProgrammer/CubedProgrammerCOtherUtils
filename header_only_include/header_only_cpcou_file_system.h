@@ -260,6 +260,35 @@ time_t cpcou_create_time(const char *name)
 }
 
 /**
+ * Gets the parent folder of a file or folder
+ */
+char *cpcou_file_parent(const char *name)
+{
+	char *pth = cpcou_absolute_path(name);
+	size_t len = strlen(pth);
+	for(int i = len - 1; i >= 0; --i)
+	{
+#ifdef __linux__
+		if(pth[i] == '/')
+#elif defined _WIN32
+		if(pth[i] == '\\')
+#endif
+		{
+#ifdef __linux__
+			if(i == 0)
+#elif defined _WIN32
+			if(i == 2)
+#endif
+				pth[i + 1] = '\0';
+			else
+				pth[i] = '\0';
+			i = -1;
+		}
+	}
+	return pth;
+}
+
+/**
  * Gets the size of a file, in bytes
  */
 long long unsigned cpcou_file_size(const char *name)

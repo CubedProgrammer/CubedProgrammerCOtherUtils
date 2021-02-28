@@ -44,6 +44,11 @@ time_t cpcou_last_stchange(const char *name);
 time_t cpcou_create_time(const char *name);
 
 /**
+ * Gets the parent folder of a file or folder
+ */
+char *cpcou_file_parent(const char *name);
+
+/**
  * Gets the size of a file, in bytes
  */
 long long unsigned cpcou_file_size(const char *name);
