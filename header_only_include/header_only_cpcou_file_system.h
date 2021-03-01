@@ -173,7 +173,7 @@ int cpcou_delete_file(const char *file)
 				free(curr);
 		}
 		free(stack);
-		return 0;
+		return res;
 	}
 	else
 #ifdef __linux__
@@ -259,6 +259,55 @@ time_t cpcou_create_time(const char *name)
 #else
 	return-1;
 #endif
+}
+
+/**
+ * Get the size of all files in a folder
+ */
+size_t cpcou_folder_size(const char *name)
+{
+	size_t sz = 0;
+	char **stuff;
+	size_t ssz = 0, ocapa = 3, capa = 5;
+	char **stack = malloc(capa * sizeof(char*));
+	stack[ssz++] = (char*)name;
+	char *curr;
+	size_t currlen;
+	while(ssz)
+	{
+		--ssz;
+		curr = stack[ssz];
+		if(cpcou_file_type(curr) == CPCOU_DIRECTORY)
+		{
+			stuff = cpcou_folder_insides(curr);
+			currlen = strlen(curr);
+			for(char **it = stuff; *it != NULL; ++it)
+			{
+				if(ssz == capa)
+				{
+					capa += ocapa;
+					ocapa = ssz;
+					stack = realloc(stack, capa * sizeof(char*));
+				}
+				stack[ssz] = malloc(currlen + strlen(*it) + 2);
+				strcpy(stack[ssz], curr);
+#ifdef __linux__
+				stack[ssz][currlen] = '/';
+#elif defined _WIN32
+				stack[ssz][currlen] = '\\';
+#endif
+				strcpy(stack[ssz] + currlen + 1, *it);
+				++ssz;
+			}
+			free(stuff);
+		}
+		else
+			sz += cpcou_file_size(curr);
+		if(curr != name)
+			free(curr);
+	}
+	free(stack);
+	return sz;
 }
 
 /**
