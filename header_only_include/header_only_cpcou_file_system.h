@@ -252,7 +252,9 @@ time_t cpcou_create_time(const char *name)
 	LARGE_INTEGER num;
 	num.u.LowPart = dat.ftCreationTime.dwLowDateTime;
 	num.u.HighPart = dat.ftCreationTime.dwHighDateTime;
+	printf("%I64d %I64d\n", dat.ftCreationTime, num.QuadPart);
 	num.QuadPart -= 116444736000000000;
+	printf("%I64d %I64d\n", dat.ftCreationTime, num.QuadPart);
 	return num.QuadPart / 10000;
 #else
 	return-1;
@@ -293,17 +295,17 @@ char *cpcou_file_parent(const char *name)
  */
 long long unsigned cpcou_file_size(const char *name)
 {
-//#ifdef __linux__
+#ifdef __linux__
 	struct stat fstats;
 	stat(name, &fstats);
 	return fstats.st_size;
-//#elif defined _WIN32
-	/*HANDLE fhand = CreateFileA(name, GENERIC_READ, FILE_SHARE_DELETE | FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	DWORD hi, lo = GetFileSize(fhand, &hi);
-	long long unsigned sz = hi;
-	sz = sz << 32 + lo;
-	return sz;*/
-//#endif
+#elif defined _WIN32
+	WIN32_FIND_DATA dat;
+	FindFirstFileA(name, &dat);
+	long long unsigned sz = dat.nFileSizeHigh;
+	sz = (sz << 32) + dat.nFileSizeLow;
+	return sz;
+#endif
 }
 
 /**
