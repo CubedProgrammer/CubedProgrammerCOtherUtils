@@ -68,5 +68,10 @@ int cpcou_file_type(const char *name);
  */
 char *cpcou_absolute_path(const char *name);
 
+/**
+ * Helper function for sorting folder insides by alphabetical order
+ */
+int cpcou____ls_strcmp_helper(const void *x, const void *y);
+
 #endif
 #endif

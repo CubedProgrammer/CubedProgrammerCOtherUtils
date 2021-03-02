@@ -93,6 +93,7 @@ char **cpcou_folder_insides(const char *name)
 	}
 	insides[pos] = NULL;
 	free(intmp);
+	qsort(insides, lsz - 2, sizeof(char*), &cpcou____ls_strcmp_helper);
 	return insides;
 }
 
@@ -385,6 +386,15 @@ char *cpcou_absolute_path(const char *name)
 	GetFullPathNameA(name, MAX_PATH, cbuf, NULL);
 #endif
 	return cbuf;
+}
+
+/**
+ * Helper function for sorting folder insides by alphabetical order
+ */
+int cpcou____ls_strcmp_helper(const void *x, const void *y)
+{
+	const char *xstr = *(const char *const*)x, *ystr = *(const char *const*)y;
+	return strcmp(xstr, ystr);
 }
 
 #endif
