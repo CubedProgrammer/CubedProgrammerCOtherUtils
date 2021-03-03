@@ -6,6 +6,11 @@
 #include<time.h>
 
 /**
+ * Root directory, it has no parent
+ */
+extern const char cpcou_root_dir[];
+
+/**
  * Gets what is inside a folder, returned pointer will be heap allocated
  * So are pointers pointed to by the returned pointer
  * The last string in the array of strings will be NULL;
@@ -47,6 +52,11 @@ time_t cpcou_create_time(const char *name);
  * Get the size of all files in a folder
  */
 size_t cpcou_folder_size(const char *name);
+
+/**
+ * Get the number of files and folders in a folder
+ */
+size_t cpcou_file_count(const char *name);
 
 /**
  * Gets the parent folder of a file or folder

@@ -14,6 +14,15 @@
 #include<cpcou_file_system.h>
 
 /**
+ * Root directory, it has no parent
+ */
+#ifdef __linux__
+const char cpcou_root_dir[]="/";
+#elif defined _WIN32
+const char cpcou_root_dir[]="C:\\";
+#endif
+
+/**
  * Gets what is inside a folder, returned pointer will be heap allocated
  * So are pointers pointed to by the returned pointer
  * The last string in the array of strings will be NULL
@@ -304,6 +313,54 @@ size_t cpcou_folder_size(const char *name)
 		}
 		else
 			sz += cpcou_file_size(curr);
+		if(curr != name)
+			free(curr);
+	}
+	free(stack);
+	return sz;
+}
+
+/**
+ * Get the number of files and folders in a folder
+ */
+size_t cpcou_file_count(const char *name)
+{
+	size_t sz = 0;
+	char **stuff;
+	size_t ssz = 0, ocapa = 3, capa = 5;
+	char **stack = malloc(capa * sizeof(char*));
+	stack[ssz++] = (char*)name;
+	char *curr;
+	size_t currlen;
+	while(ssz)
+	{
+		--ssz;
+		curr = stack[ssz];
+		if(cpcou_file_type(curr) == CPCOU_DIRECTORY)
+		{
+			stuff = cpcou_folder_insides(curr);
+			currlen = strlen(curr);
+			for(char **it = stuff; *it != NULL; ++it)
+			{
+				if(ssz == capa)
+				{
+					capa += ocapa;
+					ocapa = ssz;
+					stack = realloc(stack, capa * sizeof(char*));
+				}
+				stack[ssz] = malloc(currlen + strlen(*it) + 2);
+				strcpy(stack[ssz], curr);
+#ifdef __linux__
+				stack[ssz][currlen] = '/';
+#elif defined _WIN32
+				stack[ssz][currlen] = '\\';
+#endif
+				strcpy(stack[ssz] + currlen + 1, *it);
+				++ssz;
+			}
+			free(stuff);
+		}
+		++sz;
 		if(curr != name)
 			free(curr);
 	}
