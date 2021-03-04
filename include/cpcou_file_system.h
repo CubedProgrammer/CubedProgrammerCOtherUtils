@@ -59,6 +59,11 @@ size_t cpcou_folder_size(const char *name);
 size_t cpcou_file_count(const char *name);
 
 /**
+ * Copies a file into another location, whatever was there before is erased for good.
+ */
+int cpcou_copy_file(const char *from, const char *to);
+
+/**
  * Gets the parent folder of a file or folder
  */
 char *cpcou_file_parent(const char *name);

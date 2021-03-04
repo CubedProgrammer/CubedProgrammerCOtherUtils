@@ -102,7 +102,10 @@ char **cpcou_folder_insides(const char *name)
 	}
 	insides[pos] = NULL;
 	free(intmp);
+	// Windows is nice and gives you the files in alphabetical order, no need to sort
+#ifndef _WIN32
 	qsort(insides, lsz - 2, sizeof(char*), &cpcou____ls_strcmp_helper);
+#endif
 	return insides;
 }
 
@@ -369,6 +372,28 @@ size_t cpcou_file_count(const char *name)
 }
 
 /**
+ * Copies a file into another location, whatever was there before is erased for good.
+ */
+int cpcou_copy_file(const char *from, const char *to)
+{
+	cpcou_delete_file(to);
+#ifdef _WIN32
+	return CopyFile(from, to) ? 0 : 1;
+#else
+	size_t size = cpcou_file_size(from);
+	char *cbuf = malloc(size);
+	FILE *fhand = fopen(from, "rb");
+	fread(cbuf, sizeof(char), size, fhand);
+	fclose(fhand);
+	fhand = fopen(to, "wb");
+	size_t r = fwrite(cbuf, sizeof(char), size, fhand);
+	fclose(fhand);
+	free(cbuf);
+	return r == size ? 0 : 1;
+#endif
+}
+
+/**
  * Gets the parent folder of a file or folder
  */
 char *cpcou_file_parent(const char *name)
@@ -451,7 +476,25 @@ char *cpcou_absolute_path(const char *name)
 int cpcou____ls_strcmp_helper(const void *x, const void *y)
 {
 	const char *xstr = *(const char *const*)x, *ystr = *(const char *const*)y;
-	return strcmp(xstr, ystr);
+	size_t xlen = strlen(xstr), ylen = strlen(ystr);
+	size_t len = xlen < ylen ? xlen : ylen;
+	char u, v;
+	int res = 0;
+	for(size_t i = 0; i < len; ++i)
+	{
+		u = xstr[i], v = ystr[i];
+		if(u >= 'A' && u <= 'Z')
+			u+=0x20;
+		if(v >= 'A' && v <= 'Z')
+			v+=0x20;
+		if(u == v)
+			u = xstr[i], v = ystr[i];
+		if(u < v)
+			res = -1, len = 0;
+		else if(u > v)
+			res = 1, len = 0;
+	}
+	return res;
 }
 
 #endif
