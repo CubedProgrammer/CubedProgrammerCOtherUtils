@@ -4,6 +4,26 @@
 #define CPCOU_FILE 997
 #define CPCOU_DIRECTORY 998
 #include<time.h>
+#ifdef _WIN32
+#define MAX_PATH_LEN 260
+#else
+#include<limits.h>
+#define MAX_PATH_LEN PATH_MAX
+#endif
+
+typedef struct cpcou_file_info
+{
+	size_t plen;
+	char abspth[MAX_PATH_LEN + 1];
+	time_t last_access_time;
+	time_t last_modify_time;
+	time_t last_stchange_time;
+	time_t crtime;
+	int file_or_dir;
+	size_t size;
+	// heap allocated
+	char **insides;
+}*cpcou_file_infoptr;
 
 /**
  * Root directory, it has no parent
@@ -62,6 +82,11 @@ size_t cpcou_file_count(const char *name);
  * Copies a file into another location, whatever was there before is erased for good.
  */
 int cpcou_copy_file(const char *from, const char *to);
+
+/**
+ * Gets information about a file.
+ */
+void cpcou_file_info(const char *name, struct cpcou_file_info *cfi);
 
 /**
  * Gets the parent folder of a file or folder

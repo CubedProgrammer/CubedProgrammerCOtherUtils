@@ -394,6 +394,45 @@ int cpcou_copy_file(const char *from, const char *to)
 }
 
 /**
+ * Gets information about a file.
+ */
+void cpcou_file_info(const char *name, struct cpcou_file_info *cfi)
+{
+#ifdef _WIN32
+	WIN32_FIND_DATA dat;
+#else
+	struct stat dat;
+	stat(name, &dat);
+	cfi->last_access_time = dat.st_atim.tv_sec * 1000 + dat.st_atim.tv_nsec / 1000000;
+	cfi->last_modify_time = dat.st_mtim.tv_sec * 1000 + dat.st_mtim.tv_nsec / 1000000;
+	cfi->last_stchange_time = dat.st_ctim.tv_sec * 1000 + dat.st_ctim.tv_nsec / 1000000;
+	cfi->crtime = -1;
+	if((dat.st_mode & S_IFMT) == S_IFDIR)
+		cfi->file_or_dir = CPCOU_DIRECTORY;
+	else
+		cfi->file_or_dir = CPCOU_FILE;
+#endif
+	if(cfi->file_or_dir == CPCOU_DIRECTORY)
+		cfi->insides = cpcou_folder_insides(name);
+	else
+		cfi->insides = NULL;
+#ifdef _WIN32
+	GetFullPathNameA(name, MAX_PATH, cfi->abspth, NULL);
+#else
+	realpath(name, cfi->abspth);
+#endif
+	cfi->plen = strlen(cfi->abspth);
+	if(cfi->file_or_dir == CPCOU_FILE)
+#ifdef _WIN32
+		cfi->size = (LONGLONG)dat.nFileSizeHigh << 32 + dat.nFileSizeLow;
+#else
+		cfi->size = dat.st_size;
+	else
+		cfi->size = -1;
+#endif
+}
+
+/**
  * Gets the parent folder of a file or folder
  */
 char *cpcou_file_parent(const char *name)
