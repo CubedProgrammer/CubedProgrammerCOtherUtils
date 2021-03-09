@@ -12,6 +12,7 @@
 #include<string.h>
 #include<sys/stat.h>
 #include<cpcou_file_system.h>
+#include<cpcou_str_algo.h>
 
 /**
  * Root directory, it has no parent
@@ -515,25 +516,7 @@ char *cpcou_absolute_path(const char *name)
 int cpcou____ls_strcmp_helper(const void *x, const void *y)
 {
 	const char *xstr = *(const char *const*)x, *ystr = *(const char *const*)y;
-	size_t xlen = strlen(xstr), ylen = strlen(ystr);
-	size_t len = xlen < ylen ? xlen : ylen;
-	char u, v;
-	int res = 0;
-	for(size_t i = 0; i < len; ++i)
-	{
-		u = xstr[i], v = ystr[i];
-		if(u >= 'A' && u <= 'Z')
-			u+=0x20;
-		if(v >= 'A' && v <= 'Z')
-			v+=0x20;
-		if(u == v)
-			u = xstr[i], v = ystr[i];
-		if(u < v)
-			res = -1, len = 0;
-		else if(u > v)
-			res = 1, len = 0;
-	}
-	return res;
+	return cpcou_insens_strcmp(xstr, ystr);
 }
 
 #endif
