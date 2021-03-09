@@ -266,9 +266,7 @@ time_t cpcou_create_time(const char *name)
 	LARGE_INTEGER num;
 	num.u.LowPart = dat.ftCreationTime.dwLowDateTime;
 	num.u.HighPart = dat.ftCreationTime.dwHighDateTime;
-	printf("%I64d %I64d\n", dat.ftCreationTime, num.QuadPart);
 	num.QuadPart -= 116444736000000000;
-	printf("%I64d %I64d\n", dat.ftCreationTime, num.QuadPart);
 	return num.QuadPart / 10000;
 #else
 	return-1;
@@ -379,7 +377,7 @@ int cpcou_copy_file(const char *from, const char *to)
 {
 	cpcou_delete_file(to);
 #ifdef _WIN32
-	return CopyFile(from, to) ? 0 : 1;
+	return CopyFile(from, to, FALSE) ? 0 : 1;
 #else
 	size_t size = cpcou_file_size(from);
 	char *cbuf = malloc(size);
@@ -401,6 +399,21 @@ void cpcou_file_info(const char *name, struct cpcou_file_info *cfi)
 {
 #ifdef _WIN32
 	WIN32_FIND_DATA dat;
+	FindFirstFileA(name, &dat);
+	cfi->last_access_time = ((LONGLONG)dat.ftLastAccessTime.dwHighDateTime << 32) + dat.ftLastAccessTime.dwLowDateTime;
+	cfi->last_access_time -= 116444736000000000;
+	cfi->last_access_time /= 10000;
+	cfi->crtime = ((LONGLONG)dat.ftCreationTime.dwHighDateTime << 32) + dat.ftCreationTime.dwLowDateTime;
+	cfi->crtime -= 116444736000000000;
+	cfi->crtime /= 10000;
+	cfi->last_modify_time = ((LONGLONG)dat.ftLastWriteTime.dwHighDateTime << 32) + dat.ftLastWriteTime.dwLowDateTime;
+	cfi->last_modify_time -= 116444736000000000;
+	cfi->last_modify_time /= 10000;
+	cfi->last_stchange_time = -1;
+	if((dat.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
+		cfi->file_or_dir = CPCOU_DIRECTORY;
+	else
+		cfi->file_or_dir = CPCOU_FILE;
 #else
 	struct stat dat;
 	stat(name, &dat);
@@ -425,7 +438,7 @@ void cpcou_file_info(const char *name, struct cpcou_file_info *cfi)
 	cfi->plen = strlen(cfi->abspth);
 	if(cfi->file_or_dir == CPCOU_FILE)
 #ifdef _WIN32
-		cfi->size = (LONGLONG)dat.nFileSizeHigh << 32 + dat.nFileSizeLow;
+		cfi->size = ((LONGLONG)dat.nFileSizeHigh << 32) + dat.nFileSizeLow;
 #else
 		cfi->size = dat.st_size;
 	else
