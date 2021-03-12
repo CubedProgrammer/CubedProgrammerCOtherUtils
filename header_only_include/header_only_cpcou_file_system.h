@@ -393,6 +393,45 @@ int cpcou_copy_file(const char *from, const char *to)
 }
 
 /**
+ * Creates a folder, parent folder must exist
+ */
+void cpcou_create_folder(const char *name)
+{
+#ifdef _WIN32
+	CreateFileA(name, NULL);
+#else
+	mkdir(name, S_IRWXU);
+#endif
+}
+
+
+/**
+ * Creates a folder, parent folder need not exist
+ */
+void cpcou_create_folders(const char *name)
+{
+	char *folders = malloc(strlen(name) + 1);
+	strcpy(folders, name);
+	char *it = folders + 1;
+	while(*it)
+	{
+#ifdef _WIN32
+		if(*it == '\\' || *it == '/')
+#else
+		if(*it == '/')
+#endif
+		{
+			*it = '\0';
+			cpcou_create_folder(folders);
+			*it = '/';
+		}
+		++it;
+	}
+	cpcou_create_folder(folders);
+	free(folders);
+}
+
+/**
  * Gets information about a file.
  */
 void cpcou_file_info(const char *name, struct cpcou_file_info *cfi)
