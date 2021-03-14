@@ -398,7 +398,7 @@ int cpcou_copy_file(const char *from, const char *to)
 void cpcou_create_folder(const char *name)
 {
 #ifdef _WIN32
-	CreateFileA(name, NULL);
+	CreateDirectoryA(name, NULL);
 #else
 	mkdir(name, S_IRWXU);
 #endif
