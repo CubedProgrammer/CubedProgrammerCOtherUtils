@@ -115,7 +115,8 @@ char **cpcou_folder_insides(const char *name)
  */
 int cpcou_move_file(const char *old, const char *new)
 {
-	cpcou_delete_file(new);
+	if(access(new, F_OK) == 0)
+		cpcou_delete_file(new);
 #ifdef __linux__
 	return rename(old, new);
 #elif defined _WIN32
@@ -429,6 +430,44 @@ void cpcou_create_folders(const char *name)
 	}
 	cpcou_create_folder(folders);
 	free(folders);
+}
+
+/**
+ * Makes a file into a hidden file
+ */
+void cpcou_hide_file(const char *name)
+{
+#ifdef _WIN32
+#else
+	size_t len = strlen(name), idx = len;
+	const char *nbegin = name;
+	while(idx > 0)
+	{
+		if(name[idx] == '/')
+			nbegin = name + idx + 1;
+		--idx;
+	}
+	if(*nbegin != '.')
+	{
+		char *new = malloc(len + 2);
+		strcpy(new, name);
+		char *nnbegin = new + (nbegin - name);
+		*nnbegin = '.';
+		strcpy(nnbegin + 1, nbegin);
+		cpcou_move_file(name, new);
+		free(new);
+	}
+#endif
+}
+
+/**
+ * Unhides a hidden file
+ */
+void cpcou_unhide_file(const char *name)
+{
+#ifdef _WIN32
+#else
+#endif
 }
 
 /**

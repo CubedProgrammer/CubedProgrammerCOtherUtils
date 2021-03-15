@@ -88,11 +88,20 @@ int cpcou_copy_file(const char *from, const char *to);
  */
 void cpcou_create_folder(const char *name);
 
-
 /**
  * Creates a folder, parent folder need not exist
  */
 void cpcou_create_folders(const char *name);
+
+/**
+ * Makes a file into a hidden file
+ */
+void cpcou_hide_file(const char *name);
+
+/**
+ * Unhides a hidden file
+ */
+void cpcou_unhide_file(const char *name);
 
 /**
  * Gets information about a file.
