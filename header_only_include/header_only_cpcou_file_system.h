@@ -467,6 +467,27 @@ void cpcou_unhide_file(const char *name)
 {
 #ifdef _WIN32
 #else
+	size_t len = strlen(name), idx = len;
+	const char *nbegin = name;
+	while(idx > 0)
+	{
+		if(name[idx] == '/')
+			nbegin = name + idx + 1;
+		--idx;
+	}
+	if(*nbegin == '.')
+	{
+		char *new = malloc(len + 1);
+		strcpy(new, name);
+		char *nnbegin = new + (nbegin - name);
+		while(*nnbegin)
+		{
+			*nnbegin = *(nnbegin + 1);
+			++nnbegin;
+		}
+		cpcou_move_file(name, new);
+		free(new);
+	}
 #endif
 }
 
