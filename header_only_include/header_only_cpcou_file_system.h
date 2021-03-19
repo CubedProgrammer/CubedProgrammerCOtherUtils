@@ -438,6 +438,10 @@ void cpcou_create_folders(const char *name)
 void cpcou_hide_file(const char *name)
 {
 #ifdef _WIN32
+	WIN32_FIND_DATA dat;
+	FindFirstFileA(name, &dat);
+	dat.dwFileAttributes |= FILE_ATTRIBUTE_HIDDEN;
+	SetFileAttributesA(name, dat.dwFileAttributes);
 #else
 	size_t len = strlen(name), idx = len;
 	const char *nbegin = name;
@@ -466,6 +470,10 @@ void cpcou_hide_file(const char *name)
 void cpcou_unhide_file(const char *name)
 {
 #ifdef _WIN32
+	WIN32_FIND_DATA dat;
+	FindFirstFileA(name, &dat);
+	dat.dwFileAttributes &= ~FILE_ATTRIBUTE_HIDDEN;
+	SetFileAttributesA(name, dat.dwFileAttributes);
 #else
 	size_t len = strlen(name), idx = len;
 	const char *nbegin = name;
