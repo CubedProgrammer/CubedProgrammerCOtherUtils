@@ -554,6 +554,18 @@ void cpcou_file_info(const char *name, struct cpcou_file_info *cfi)
 }
 
 /**
+ * Get the user's home directory
+ */
+void cpcou_get_home(char *cbuf)
+{
+#ifdef _WIN32
+	strcpy(cbuf, getenv("userhome"));
+#else
+	strcpy(cbuf, getenv("HOME"));
+#endif
+}
+
+/**
  * Gets the parent folder of a file or folder
  */
 char *cpcou_file_parent(const char *name)
