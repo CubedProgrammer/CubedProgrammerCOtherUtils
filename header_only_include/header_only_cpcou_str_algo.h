@@ -1,6 +1,7 @@
 #ifndef __cplusplus
 #ifndef Included_header_only_cpcou_str_algo_h
 #define Included_header_only_cpcou_str_algo_h
+#include<stdlib.h>
 #include<string.h>
 
 /**
@@ -33,6 +34,16 @@ int cpcou_insens_strcmp(const char *x, const char *y)
  * Case insensitive natural string comparison
  */
 int cpcou_insense_strnatcmp(const char *x, const char *y);
+
+/**
+ * Copies a string into a new heap allocated pointer
+ */
+char *cpcou_cpy_cstr(const char *x)
+{
+	char *y = malloc(strlen(x) + 1);
+	strcpy(y, x);
+	return y;
+}
 
 #endif
 #endif
