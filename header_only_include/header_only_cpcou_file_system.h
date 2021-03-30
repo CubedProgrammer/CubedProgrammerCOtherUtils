@@ -500,6 +500,54 @@ void cpcou_unhide_file(const char *name)
 }
 
 /**
+ * Get the file information of files in a folder
+ */
+struct cpcou_file_info *cpcou_folder_inside_file_info(const char *name, size_t * szp)
+{
+	struct cpcou_file_info *insides;
+	size_t capa = 5, ocapa = 3, lsz = 0;
+	struct cpcou_file_info *intmp = malloc(capa * sizeof(struct cpcou_file_info));
+	char *path;
+	size_t namlen = strlen(name);
+	if(name[namlen-1] == '/')
+		--namlen;
+#ifdef _WIN32
+#else
+	DIR *dir = opendir(name);
+	struct dirent *en = readdir(dir);
+#endif
+#ifdef _WIN32
+#else
+	while(en)
+#endif
+	{
+		if(lsz == capa)
+		{
+			capa += ocapa;
+			intmp = realloc(intmp, capa * sizeof(struct cpcou_file_info));
+			ocapa = lsz;
+		}
+		path = malloc(namlen + 2 + strlen(en->d_name));
+		strcpy(path, name);
+		path[namlen] = '/';
+		strcpy(path + namlen + 1, en->d_name);
+		cpcou_file_info(path, intmp + lsz);
+		++lsz;
+#ifdef _WIN32
+#else
+		en = readdir(dir);
+#endif
+		free(path);
+	}
+	insides = malloc(lsz * sizeof(struct cpcou_file_info));
+	memcpy(insides, intmp, lsz * sizeof(struct cpcou_file_info));
+	free(intmp);
+	if(szp)
+		*szp = lsz;
+	return insides;
+}
+
+/**
  * Gets information about a file.
  */
 void cpcou_file_info(const char *name, struct cpcou_file_info *cfi)

@@ -104,6 +104,11 @@ void cpcou_hide_file(const char *name);
 void cpcou_unhide_file(const char *name);
 
 /**
+ * Get the file information of files in a folder
+ */
+struct cpcou_file_info *cpcou_folder_inside_file_info(const char *name, size_t *szp);
+
+/**
  * Gets information about a file.
  */
 void cpcou_file_info(const char *name, struct cpcou_file_info *cfi);
