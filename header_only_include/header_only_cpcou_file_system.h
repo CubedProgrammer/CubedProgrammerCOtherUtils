@@ -512,11 +512,18 @@ struct cpcou_file_info *cpcou_folder_inside_file_info(const char *name, size_t *
 	if(name[namlen-1] == '/')
 		--namlen;
 #ifdef _WIN32
+	char *wcs = malloc(namlen + 3);
+	strcpy(wcs, name);
+	strcpy(wcs + namlen, "\\*");
+	WIN32_FIND_DATA fd;
+	HANDLE fh = FindFirstFileA(wcs, &fd);
+	free(wcs);
 #else
 	DIR *dir = opendir(name);
 	struct dirent *en = readdir(dir);
 #endif
 #ifdef _WIN32
+	do
 #else
 	while(en)
 #endif
@@ -527,18 +534,29 @@ struct cpcou_file_info *cpcou_folder_inside_file_info(const char *name, size_t *
 			intmp = realloc(intmp, capa * sizeof(struct cpcou_file_info));
 			ocapa = lsz;
 		}
+#ifdef _WIN32
+		path = malloc(namlen + 2 + strlen(fd.cFileName));
+#else
 		path = malloc(namlen + 2 + strlen(en->d_name));
+#endif
 		strcpy(path, name);
+#ifdef _WIN32
+		path[namlen] = '\\';
+		strcpy(path + namlen + 1, fd.cFileName);
+#else
 		path[namlen] = '/';
 		strcpy(path + namlen + 1, en->d_name);
+#endif
 		cpcou_file_info(path, intmp + lsz);
 		++lsz;
-#ifdef _WIN32
-#else
+#ifndef _WIN32
 		en = readdir(dir);
 #endif
 		free(path);
 	}
+#ifdef _WIN32
+	while(FindNextFileA(fh, &fd));
+#endif
 	insides = malloc(lsz * sizeof(struct cpcou_file_info));
 	memcpy(insides, intmp, lsz * sizeof(struct cpcou_file_info));
 	free(intmp);
