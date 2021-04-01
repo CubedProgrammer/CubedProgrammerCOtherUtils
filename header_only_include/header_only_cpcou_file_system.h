@@ -610,10 +610,14 @@ void cpcou_file_info(const char *name, struct cpcou_file_info *cfi)
 #endif
 	cfi->plen = strlen(cfi->abspth);
 	if(cfi->file_or_dir == CPCOU_FILE)
+	{
 #ifdef _WIN32
 		cfi->size = ((LONGLONG)dat.nFileSizeHigh << 32) + dat.nFileSizeLow;
 #else
 		cfi->size = dat.st_size;
+		cfi->bsz = dat.st_blksize;
+		cfi->bcnt = dat.st_blocks;
+	}
 	else
 		cfi->size = -1;
 #endif

@@ -21,6 +21,8 @@ typedef struct cpcou_file_info
 	time_t crtime;
 	int file_or_dir;
 	size_t size;
+	size_t bsz; // block size
+	size_t bcnt; // number of blocks
 	// heap allocated
 	char **insides;
 }*cpcou_file_infoptr;
