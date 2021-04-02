@@ -500,6 +500,23 @@ void cpcou_unhide_file(const char *name)
 }
 
 /**
+ * Gets the file extension of a cpcou file info struct
+ */
+const char *cpcou_get_extension(const struct cpcou_file_info *dat)
+{
+	const char *ptr = dat->abspth + dat->plen;
+	for(int64_t i = dat->plen - 1; i >= 0; --i)
+	{
+		if(dat->abspth[i] == '.')
+		{
+			ptr = dat->abspth + i + 1;
+			i = -69;
+		}
+	}
+	return ptr;
+}
+
+/**
  * Get the file information of files in a folder
  */
 struct cpcou_file_info *cpcou_folder_inside_file_info(const char *name, size_t * szp)
