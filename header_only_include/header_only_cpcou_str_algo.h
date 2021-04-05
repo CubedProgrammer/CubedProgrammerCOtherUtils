@@ -4,6 +4,28 @@
 #include<stdlib.h>
 #include<string.h>
 
+// for cpcou_sort_strs
+static int(*cpcou____sort_strs_compar)(const char *, const char *);
+
+// also for cpcou_sort_strs
+static inline int cpcou____strs_void_compar(const void *m, const void *n)
+{
+	const char *u = *(const char *const *)m, *v = *(const char *const *)n;
+	return cpcou____sort_strs_compar(u, v);
+}
+
+/**
+ * Sorts an array of strings
+ */
+void cpcou_sort_strs(const char **strs, int(*compar)(const char *, const char *))
+{
+	size_t len = 0;
+	while(strs[len])
+		++len;
+	cpcou____sort_strs_compar = compar;
+	qsort(strs, len, sizeof(const char *), cpcou____strs_void_compar);
+}
+
 /**
  * Case insensitive comparison
  */

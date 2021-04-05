@@ -636,11 +636,10 @@ void cpcou_file_info(const char *name, struct cpcou_file_info *cfi)
 		cfi->size = dat.st_size;
 		cfi->bsz = dat.st_blksize;
 		cfi->bcnt = dat.st_blocks;
-
-	else
-		cfi->size = -1;
 #endif
 	}
+	else
+		cfi->size = -1;
 }
 
 /**

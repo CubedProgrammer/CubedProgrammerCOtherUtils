@@ -3,6 +3,11 @@
 #define Included_cpcou_str_algo_h
 
 /**
+ * Sorts an array of strings
+ */
+void cpcou_sort_strs(const char **strs, int(*compar)(const char *, const char *));
+
+/**
  * Case insensitive comparison
  */
 int cpcou_insens_strcmp(const char *x, const char *y);
