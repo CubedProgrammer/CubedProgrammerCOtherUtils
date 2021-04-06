@@ -3,6 +3,7 @@
 #define Included_header_only_cpcou_str_algo_h
 #include<stdlib.h>
 #include<string.h>
+#include<cpcou_str_algo.h>
 
 // for cpcou_sort_strs
 static int(*cpcou____sort_strs_compar)(const char *, const char *);
@@ -65,6 +66,23 @@ char *cpcou_cpy_cstr(const char *x)
 	char *y = malloc(strlen(x) + 1);
 	strcpy(y, x);
 	return y;
+}
+
+/**
+ * Get the type of character, digit, lowercase, uppercase, or whitespace
+ */
+enum cpcou_char_type cpcou_typeof_char(char c)
+{
+	if(c >= '0' && c <= '9')
+		return CPCOU_DIGIT;
+	else if(strchr("\n\t ", c) != NULL)
+		return CPCOU_WHITESPACE;
+	else if(c >= 'a' && c <= 'z')
+		return CPCOU_LOWERCASE_ENGLISH;
+	else if(c >= 'A' && c <= 'Z')
+		return CPCOU_UPPERCASE_ENGLISH;
+	else
+		return CPCOU_OTHER_CHAR_TYPE;
 }
 
 #endif
