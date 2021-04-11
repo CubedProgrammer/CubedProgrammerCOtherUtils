@@ -8,5 +8,10 @@
  */
 void cpcou_stable_sort(void *buf, size_t cnt, size_t sz, int(*compar)(const void *, const void *));
 
+/**
+ * Get the endianness of your machine, 0 is big and 1 is little
+ */
+int cpcou_get_endianness(void);
+
 #endif
 #endif
