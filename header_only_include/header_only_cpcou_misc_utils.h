@@ -51,6 +51,7 @@ void cpcou_stable_sort(void *buf, size_t cnt, size_t sz, int(*compar)(const void
 		rstk[ssz] = r;
 		rstk[ssz + 1] = l + r - 1 >> 1;
 		ssz += 2;
+		memcpy(cbuf + l, aux + l, r - l + 1);
 	}
 	free(aux);
 }

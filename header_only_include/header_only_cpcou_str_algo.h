@@ -3,6 +3,7 @@
 #define Included_header_only_cpcou_str_algo_h
 #include<stdlib.h>
 #include<string.h>
+#include<cpcou_misc_utils.h>
 #include<cpcou_str_algo.h>
 
 // for cpcou_sort_strs
@@ -51,6 +52,18 @@ int cpcou_insens_strcmp(const char *x, const char *y)
 			res = 1, len = 0;
 	}
 	return res;
+}
+
+/**
+ * Sorts an array of strings, this is a stable algorithm
+ */
+void cpcou_ssort_strs(const char **strs, int(*compar)(const char *, const char *))
+{
+	size_t len = 0;
+	while(strs[len])
+		++len;
+	cpcou____sort_strs_compar = compar;
+	cpcou_stable_sort(strs, len, sizeof(const char *), cpcou____strs_void_compar);
 }
 
 /**

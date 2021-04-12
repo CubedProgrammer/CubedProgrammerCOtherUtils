@@ -11,6 +11,11 @@ enum cpcou_char_type
 void cpcou_sort_strs(const char **strs, int(*compar)(const char *, const char *));
 
 /**
+ * Sorts an array of strings, this is a stable algorithm
+ */
+void cpcou_ssort_strs(const char **strs, int(*compar)(const char *, const char *));
+
+/**
  * Case insensitive comparison
  */
 int cpcou_insens_strcmp(const char *x, const char *y);
