@@ -12,19 +12,36 @@ void cpcou_stable_sort(void *buf, size_t cnt, size_t sz, int(*compar)(const void
 	char unsigned *aux = malloc(cnt * sz);
 	char unsigned *cbuf = (char unsigned *)buf;
 	size_t lstk[100], rstk[100];
+	char mstk[100];
 	size_t ssz = 0;
 	lstk[ssz] = 0;
-	rstk[ssz] = sz - 1;
+	rstk[ssz] = cnt - 1;
+	mstk[ssz] = 1;
 	++ssz;
 	size_t l, r;
 	size_t mind, lind, rind;
+	char mode;
 	while(ssz)
 	{
 		--ssz;
 		l = lstk[ssz];
-		r = lstk[ssz];
+		r = rstk[ssz];
 		if(l == r)
 			continue;
+		mode = mstk[ssz];
+		if(mode)
+		{
+			mstk[ssz] = 0;
+			++ssz;
+			lstk[ssz] = l + r + 1 >> 1;
+			lstk[ssz + 1] = l;
+			rstk[ssz] = r;
+			rstk[ssz + 1] = l + r - 1 >> 1;
+			mstk[ssz] = 1;
+			mstk[ssz + 1] = 1;
+			ssz += 2;
+			continue;
+		}
 		mind = l;
 		lind = l;
 		rind = l + r + 1 >> 1;
@@ -38,7 +55,7 @@ void cpcou_stable_sort(void *buf, size_t cnt, size_t sz, int(*compar)(const void
 			else
 			{
 				memcpy(aux + mind * sz, cbuf + rind * sz, sz);
-				++lind;
+				++rind;
 			}
 			++mind;
 		}
@@ -46,12 +63,7 @@ void cpcou_stable_sort(void *buf, size_t cnt, size_t sz, int(*compar)(const void
 			memcpy(aux + mind * sz, cbuf + lind * sz, ((l + r + 1 >> 1) - lind) * sz);
 		if(rind < r + 1)
 			memcpy(aux + mind * sz, cbuf + rind * sz, (r - rind + 1) * sz);
-		lstk[ssz] = l + r + 1 >> 1;
-		lstk[ssz + 1] = l;
-		rstk[ssz] = r;
-		rstk[ssz + 1] = l + r - 1 >> 1;
-		ssz += 2;
-		memcpy(cbuf + l, aux + l, r - l + 1);
+		memcpy(cbuf + l * sz, aux + l * sz, (r - l + 1) * sz);
 	}
 	free(aux);
 }
