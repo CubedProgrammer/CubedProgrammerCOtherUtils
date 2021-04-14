@@ -67,6 +67,16 @@ void cpcou_stable_sort(void *buf, size_t cnt, size_t sz, int(*compar)(const void
 	}
 	free(aux);
 }
+/**
+ * Changes the endianness of a number
+ */
+size_t cpcou_convert_endianness(size_t bs)
+{
+	size_t new = 0;
+	for(size_t i = 0; i < sizeof(size_t) / 2; ++i)
+		new += (bs >> 8 * (sizeof(size_t) - i * 2 - 1) & 0xffull << 8 * i) | (bs << 8 * (sizeof(size_t) - i * 2 - 1) & 0xffull << 8 * (sizeof(size_t) - i - 1));
+	return new;
+}
 
 /**
  * Get the endianness of your machine, 0 is big and 1 is little

@@ -9,6 +9,11 @@
 void cpcou_stable_sort(void *buf, size_t cnt, size_t sz, int(*compar)(const void *, const void *));
 
 /**
+ * Changes the endianness of a number
+ */
+size_t cpcou_convert_endianness(size_t bs);
+
+/**
  * Get the endianness of your machine, 0 is big and 1 is little
  */
 int cpcou_get_endianness(void);
