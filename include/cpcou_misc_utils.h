@@ -3,6 +3,17 @@
 #define Included_cpcou_misc_utils_h
 #include<stdlib.h>
 
+typedef struct cpcou_lcg
+{
+	long long unsigned seed;
+	long long unsigned a, m, c;
+}cpcou_lcg;
+
+/**
+ * Gets the next random value of an LCG
+ */
+int cpcou_lcg_next(struct cpcou_lcg *gen);
+
 /**
  * Stable sorts an array of elements
  */

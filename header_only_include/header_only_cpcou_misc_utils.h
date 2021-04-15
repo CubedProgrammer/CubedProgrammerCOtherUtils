@@ -5,6 +5,16 @@
 #include<cpcou_misc_utils.h>
 
 /**
+ * Gets the next random value of an LCG
+ */
+int cpcou_lcg_next(struct cpcou_lcg *gen)
+{
+	gen->seed = gen->seed * gen->a + gen->c;
+	gen->seed &= (1 << gen->m) - 1;
+	return gen->seed >> (gen->m - 8 * sizeof(int));
+}
+
+/**
  * Stable sorts an array of elements
  */
 void cpcou_stable_sort(void *buf, size_t cnt, size_t sz, int(*compar)(const void *, const void *))
