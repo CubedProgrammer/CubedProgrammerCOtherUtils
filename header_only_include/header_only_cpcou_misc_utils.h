@@ -5,12 +5,25 @@
 #include<cpcou_misc_utils.h>
 
 /**
+ * Initialize a java.util.Random with a seed
+ */
+struct cpcou_lcg cpcou_init_jur(long seed)
+{
+	struct cpcou_lcg rand;
+	rand.seed = seed;
+	rand.a = 25214903917;
+	rand.m = 48;
+	rand.c = 11;
+	return rand;
+}
+
+/**
  * Gets the next random value of an LCG
  */
 int cpcou_lcg_next(struct cpcou_lcg *gen)
 {
 	gen->seed = gen->seed * gen->a + gen->c;
-	gen->seed &= (1 << gen->m) - 1;
+	gen->seed &= (1ull << gen->m) - 1;
 	return gen->seed >> (gen->m - 8 * sizeof(int));
 }
 

@@ -10,6 +10,11 @@ typedef struct cpcou_lcg
 }cpcou_lcg;
 
 /**
+ * Initialize a java.util.Random with a seed
+ */
+struct cpcou_lcg cpcou_init_jur(long seed);
+
+/**
  * Gets the next random value of an LCG
  */
 int cpcou_lcg_next(struct cpcou_lcg *gen);
