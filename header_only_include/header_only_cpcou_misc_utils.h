@@ -28,6 +28,15 @@ int cpcou_lcg_next(struct cpcou_lcg *gen)
 }
 
 /**
+ * Gets the next random float of an LCG
+ */
+double cpcou_lcg_nextf(struct cpcou_lcg *gen)
+{
+	int x = cpcou_lcg_next(gen);
+	return(double) (x & 0x7fffffff) / 0x7fffffff;
+}
+
+/**
  * Stable sorts an array of elements
  */
 void cpcou_stable_sort(void *buf, size_t cnt, size_t sz, int(*compar)(const void *, const void *))
