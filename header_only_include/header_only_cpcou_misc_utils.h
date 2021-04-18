@@ -18,6 +18,17 @@ struct cpcou_lcg cpcou_init_jur(long seed)
 }
 
 /**
+ * Gets next random number within [lo, up]
+ */
+int cpcou_lcg_next_with_bounds(struct cpcou_lcg *gen, int lo, int up)
+{
+	int x = cpcou_lcg_next(gen);
+	int range = up - lo + 1;
+	x = (x % range + range) % range;
+	return x + lo;
+}
+
+/**
  * Gets the next random value of an LCG
  */
 int cpcou_lcg_next(struct cpcou_lcg *gen)
@@ -28,12 +39,20 @@ int cpcou_lcg_next(struct cpcou_lcg *gen)
 }
 
 /**
+ * Get the next random 64-bit integer of an LCG
+ */
+int64_t cpcou_lcg_nextl(struct cpcou_lcg *gen)
+{
+	return((int64_t) cpcou_lcg_next(gen) << 32) | (unsigned) cpcou_lcg_next(gen);
+}
+
+/**
  * Gets the next random float of an LCG
  */
 double cpcou_lcg_nextf(struct cpcou_lcg *gen)
 {
-	int x = cpcou_lcg_next(gen);
-	return(double) (x & 0x7fffffff) / 0x7fffffff;
+	int64_t x = cpcou_lcg_nextl(gen);
+	return(double) (x & 0xfffffffffffffll) / 0xfffffffffffffll;
 }
 
 /**

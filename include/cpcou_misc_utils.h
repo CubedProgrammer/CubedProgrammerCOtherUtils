@@ -15,9 +15,19 @@ typedef struct cpcou_lcg
 struct cpcou_lcg cpcou_init_jur(long seed);
 
 /**
+ * Gets next random number within [lo, up]
+ */
+int cpcou_lcg_next_with_bounds(struct cpcou_lcg *gen, int lo, int up);
+
+/**
  * Gets the next random value of an LCG
  */
 int cpcou_lcg_next(struct cpcou_lcg *gen);
+
+/**
+ * Get the next random 64-bit integer of an LCG
+ */
+int64_t cpcou_lcg_nextl(struct cpcou_lcg *gen);
 
 /**
  * Gets the next random float of an LCG
