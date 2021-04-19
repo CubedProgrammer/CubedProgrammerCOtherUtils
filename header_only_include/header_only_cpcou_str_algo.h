@@ -17,6 +17,30 @@ static inline int cpcou____strs_void_compar(const void *m, const void *n)
 }
 
 /**
+ * Sets all letters to lowercase
+ */
+void cpcou_to_lower(char *str)
+{
+	for(char *it = str; *it != '\0'; ++it)
+	{
+		if(*it > 'A' && *it < 'Z')
+			*it += 0x20;
+	}
+}
+
+/**
+ * Sets all letters to uppercase
+ */
+void cpcou_to_upper(char *str)
+{
+	for(char *it = str; *it != '\0'; ++it)
+	{
+		if(*it > 'a' && *it < 'z')
+			*it -= 0x20;
+	}
+}
+
+/**
  * Sorts an array of strings
  */
 void cpcou_sort_strs(const char **strs, int(*compar)(const char *, const char *))

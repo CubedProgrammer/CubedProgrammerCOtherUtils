@@ -6,6 +6,16 @@ enum cpcou_char_type
 { CPCOU_WHITESPACE = 997, CPCOU_LOWERCASE_ENGLISH, CPCOU_UPPERCASE_ENGLISH, CPCOU_DIGIT, CPCOU_OTHER_CHAR_TYPE };
 
 /**
+ * Sets all letters to lowercase
+ */
+void cpcou_to_lower(char *str);
+
+/**
+ * Sets all letters to uppercase
+ */
+void cpcou_to_upper(char *str);
+
+/**
  * Sorts an array of strings
  */
 void cpcou_sort_strs(const char **strs, int(*compar)(const char *, const char *));
