@@ -10,6 +10,11 @@ typedef struct cpcou_lcg
 }cpcou_lcg;
 
 /**
+ * Allocates memory for a two-dimensional array
+ */
+void *cpcou_malloc_2d(size_t width, size_t height);
+
+/**
  * Initialize a java.util.Random with a seed
  */
 struct cpcou_lcg cpcou_init_jur(long seed);

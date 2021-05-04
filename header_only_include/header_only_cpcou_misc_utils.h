@@ -5,12 +5,24 @@
 #include<cpcou_misc_utils.h>
 
 /**
+ * Allocates memory for a two-dimensional array
+ */
+void *cpcou_malloc_2d(size_t width, size_t height)
+{
+	void *mem = malloc(width * height + sizeof(void*) * height);
+	char unsigned **cmem = mem;
+	for(size_t i = 0; i < height; ++i)
+		cmem[i] = (char unsigned*)(cmem + height) + width * i;
+	return mem;
+}
+
+/**
  * Initialize a java.util.Random with a seed
  */
 struct cpcou_lcg cpcou_init_jur(long seed)
 {
 	struct cpcou_lcg rand;
-	rand.seed = seed;
+	rand.seed = seed ^ 25214903917;
 	rand.a = 25214903917;
 	rand.m = 48;
 	rand.c = 11;

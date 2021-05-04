@@ -1,6 +1,7 @@
 #ifndef __cplusplus
 #ifndef Included_cpcou_str_algo_h
 #define Included_cpcou_str_algo_h
+#define cpcou_strarr_size(__sz__, __strs__)do{__sz__=0;while(__strs__[__sz__]!=NULL)__sz__++;}while(0);
 
 enum cpcou_char_type
 { CPCOU_WHITESPACE = 997, CPCOU_LOWERCASE_ENGLISH, CPCOU_UPPERCASE_ENGLISH, CPCOU_DIGIT, CPCOU_OTHER_CHAR_TYPE };
