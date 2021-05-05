@@ -5,6 +5,16 @@
 #include<cpcou_misc_utils.h>
 
 /**
+ * Filling a block of memory with a value
+ */
+void cpcou_fill_mem(void *ptr, const void *val, size_t size, size_t cnt)
+{
+	char unsigned *cptr = ptr;
+	for(size_t i = 0; i < cnt; ++i)
+		memcpy(cptr + size * i, val, size);
+}
+
+/**
  * Allocates memory for a two-dimensional array
  */
 void *cpcou_malloc_2d(size_t width, size_t height)

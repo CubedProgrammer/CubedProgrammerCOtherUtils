@@ -10,6 +10,11 @@ typedef struct cpcou_lcg
 }cpcou_lcg;
 
 /**
+ * Filling a block of memory with a value
+ */
+void cpcou_fill_mem(void *ptr, const void *val, size_t size, size_t cnt);
+
+/**
  * Allocates memory for a two-dimensional array
  */
 void *cpcou_malloc_2d(size_t width, size_t height);
