@@ -2,6 +2,7 @@
 #ifndef Included_cpcou_misc_utils_h
 #define Included_cpcou_misc_utils_h
 #include<stdlib.h>
+#define cpcou_memset_macro(typename, arr, val, cnt)do{typename cpcou____tmp = val;cpcou_fill_mem(arr, &cpcou____tmp, sizeof(typename), cnt);}while(0)
 
 typedef struct cpcou_lcg
 {
