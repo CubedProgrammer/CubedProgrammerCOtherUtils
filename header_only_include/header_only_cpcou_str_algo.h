@@ -17,6 +17,27 @@ static inline int cpcou____strs_void_compar(const void *m, const void *n)
 }
 
 /**
+ * Check if two strings are permutations of each other
+ */
+int cpcou_is_permutation(const char *x, const char *y)
+{
+	size_t cnts[256];
+	memset(cnts, 0, sizeof(cnts));
+	for(size_t i = 0; x[i] != '\0'; ++i)
+	{
+		++cnts[x[i]];
+		--cnts[y[i]];
+	}
+	int res = 1;
+	for(int i = 0; i < 256; ++i)
+	{
+		if(cnts[i] != 0)
+			res = 0;
+	}
+	return res;
+}
+
+/**
  * Sets all letters to lowercase
  */
 void cpcou_to_lower(char *str)
