@@ -5,6 +5,27 @@
 #include<cpcou_misc_utils.h>
 
 /**
+ * Checks if two char arrays are permutations
+ */
+int cpcou_arr_perms(const char *x, const char *y)
+{
+	long cnts[256];
+	for(size_t i = 0; x[i]; ++i)
+		++cnts[x[i]];
+	for(size_t i = 0; y[i]; ++i)
+		--cnts[y[i]];
+	size_t diff = 0;
+	for(int i = 1; i < 256; ++i)
+	{
+		if(cnts[i] < 0)
+			diff -= cnts[i];
+		else
+			diff += cnts[i];
+	}
+	return diff;
+}
+
+/**
  * Filling a block of memory with a value
  */
 void cpcou_fill_mem(void *ptr, const void *val, size_t size, size_t cnt)

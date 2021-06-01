@@ -11,6 +11,11 @@ typedef struct cpcou_lcg
 }cpcou_lcg;
 
 /**
+ * Checks if two char arrays are permutations
+ */
+int cpcou_arr_perms(const char *x, const char *y);
+
+/**
  * Filling a block of memory with a value
  */
 void cpcou_fill_mem(void *ptr, const void *val, size_t size, size_t cnt);
