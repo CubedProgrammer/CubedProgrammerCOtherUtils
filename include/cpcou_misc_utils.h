@@ -3,12 +3,19 @@
 #define Included_cpcou_misc_utils_h
 #include<stdlib.h>
 #define cpcou_memset_macro(typename, arr, val, cnt)do{typename cpcou____tmp = val;cpcou_fill_mem(arr, &cpcou____tmp, sizeof(typename), cnt);}while(0)
+#define cpcou_reverse_arr(arr, size)for(size_t i = 0; i < (size / 2);i++)cpcou_swap_mem(arr + i, arr + size - i - 1, sizeof(arr[0]))
+#define cpcou_swap_var(x, y)cpcou_swap_mem(&x, &y, sizeof(x))
 
 typedef struct cpcou_lcg
 {
 	long long unsigned seed;
 	long long unsigned a, m, c;
 }cpcou_lcg;
+
+/**
+ * Swaps the data in two blocks of memory
+ */
+void cpcou_swap_mem(void *x, void *y, size_t sz);
 
 /**
  * Checks if two char arrays are permutations

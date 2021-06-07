@@ -5,6 +5,31 @@
 #include<cpcou_misc_utils.h>
 
 /**
+ * Swaps the data in two blocks of memory
+ */
+void cpcou_swap_mem(void *x, void *y, size_t sz)
+{
+	if(sz < 1000)
+	{
+		char unsigned tmp[1000];
+		memcpy(tmp, x, sz);
+		memcpy(x, y, sz);
+		memcpy(y, tmp, sz);
+	}
+	else
+	{
+		char unsigned *m = x, *n = y;
+		char unsigned tmp;
+		for(size_t i = 0; i < sz; i++)
+		{
+			tmp = m[i];
+			m[i] = n[i];
+			n[i] = tmp;
+		}
+	}
+}
+
+/**
  * Checks if two char arrays are permutations
  */
 int cpcou_arr_perms(const char *x, const char *y)
