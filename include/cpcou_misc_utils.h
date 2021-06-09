@@ -3,8 +3,10 @@
 #define Included_cpcou_misc_utils_h
 #include<stdlib.h>
 #define cpcou_memset_macro(typename, arr, val, cnt)do{typename cpcou____tmp = val;cpcou_fill_mem(arr, &cpcou____tmp, sizeof(typename), cnt);}while(0)
-#define cpcou_reverse_arr(arr, size)for(size_t i = 0; i < ((size) / 2);i++)cpcou_swap_mem(arr + i, arr + size - i - 1, sizeof(arr[0]))
+#define cpcou_reverse_arr(arr, size)for(size_t i = 0; i < ((size) / 2);i++)cpcou_swap_mem(arr + i, arr + size - i - 1, sizeof((arr)[0]))
 #define cpcou_swap_var(x, y)cpcou_swap_mem(&(x), &(y), sizeof(x))
+#define cpcou_next_perm(arr, size, compar)do{size_t ind = 0, next;for(size_t i = size - 1; i > 0; i--){if(compar((arr)[i - 1], (arr)[i])){ind = i; i = 1;}}cpcou_reverse_arr(arr + ind, size - ind);if(ind > 0){--ind;for(size_t i = ind; i < size; i++){if(compar((arr)[ind], (arr)[i])){next = i;i = size;}}cpcou_swap_mem(arr + ind, arr + next, sizeof((arr)[0]));}}while(0)
+#define cpcou_compar_macro(x, y)((x)<(y))
 
 typedef struct cpcou_lcg
 {
