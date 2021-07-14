@@ -643,12 +643,69 @@ void cpcou_file_info(const char *name, struct cpcou_file_info *cfi)
 }
 
 /**
+ * Finds a file in a directory, case sensitive for linux and insensitive for windows
+ */
+void cpcou_find_file(const char *name, const char *dir, char *path)
+{
+	char **stuff;
+	size_t ssz = 0, ocapa = 3, capa = 5;
+	char **stack = malloc(capa * sizeof(char*));
+	stack[ssz++] = (char*)dir;
+	char *curr;
+	size_t currlen;
+	*path = '\0';
+	while(ssz)
+	{
+		--ssz;
+		curr = stack[ssz];
+		if(cpcou_file_type(curr) == CPCOU_DIRECTORY)
+		{
+			stuff = cpcou_folder_insides(curr);
+			currlen = strlen(curr);
+			for(char **it = stuff; *it != NULL; ++it)
+			{
+
+				if(ssz == capa)
+				{
+					capa += ocapa;
+					ocapa = ssz;
+					stack = realloc(stack, capa * sizeof(char*));
+				}
+				stack[ssz] = malloc(currlen + strlen(*it) + 2);
+				strcpy(stack[ssz], curr);
+#ifdef __linux__
+				stack[ssz][currlen] = '/';
+#elif defined _WIN32
+				stack[ssz][currlen] = '\\';
+#endif
+				strcpy(stack[ssz] + currlen + 1, *it);
+#ifdef _WIN32
+#else
+				if(strcmp(*it, name) == 0)
+#endif
+				{
+#ifdef _WIN32
+#else
+					realpath(stack[ssz], path);
+#endif
+				}
+				++ssz;
+			}
+			free(stuff);
+		}
+		if(curr != dir)
+			free(curr);
+	}
+	free(stack);
+}
+
+/**
  * Get the user's home directory
  */
 void cpcou_get_home(char *cbuf)
 {
 #ifdef _WIN32
-	strcpy(cbuf, getenv("userhome"));
+	strcpy(cbuf, getenv("userprofile"));
 #else
 	strcpy(cbuf, getenv("HOME"));
 #endif

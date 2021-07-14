@@ -121,6 +121,11 @@ struct cpcou_file_info *cpcou_folder_inside_file_info(const char *name, size_t *
 void cpcou_file_info(const char *name, struct cpcou_file_info *cfi);
 
 /**
+ * Finds a file in a directory, case sensitive for linux and insensitive for windows
+ */
+void cpcou_find_file(const char *name, const char *dir, char *path);
+
+/**
  * Get the user's home directory
  */
 void cpcou_get_home(char *cbuf);
