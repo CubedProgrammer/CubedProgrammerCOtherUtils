@@ -1,0 +1,25 @@
+#ifndef __cplusplus
+#ifndef Included_cpcou_process_basic_h
+#define Included_cpcou_process_basic_h
+#include<cpcou_file_system.h>
+
+typedef int cpcou_pid_t;
+
+typedef struct cpcou____process
+{
+	cpcou_pid_t id;
+	char name[MAX_PATH_LEN];
+}cpcou_process, *pcpcou_process;
+
+/**
+ * Get all processes, returns the number of processes found
+ */
+size_t cpcou_get_processes(pcpcou_process ps);
+
+/**
+ * End the life of a process by its id
+ */
+void cpcou_kill_process(cpcou_pid_t pid);
+
+#endif
+#endif
