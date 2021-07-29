@@ -23,18 +23,23 @@ size_t cpcou_get_processes(pcpcou_process ps)
 	DIR *pdir = opendir("/proc");
 	struct dirent *en = readdir(pdir);
 	FILE *pcmd;
+	char fc;
 	while(en != NULL)
 	{
-		ps[found].id = atoi(en->d_name);
-		strcpy(pdn, "/proc/");
-		strcpy(pdn + 6, en->d_name);
-		strcpy(pdn + 6 + strlen(en->d_name), "/cmdline");
-		pcmd = fopen(pdn, "r");
-		cmdlen = fread(ps[found].name, 1, sizeof(ps[found].name), pcmd);
-		ps[found].name[cmdlen] = '\0';
-		fclose(pcmd);
+		fc = en->d_name[0];
+		if(fc > '0' && fc < '9')
+		{
+			ps[found].id = atoi(en->d_name);
+			strcpy(pdn, "/proc/");
+			strcpy(pdn + 6, en->d_name);
+			strcpy(pdn + 6 + strlen(en->d_name), "/cmdline");
+			pcmd = fopen(pdn, "r");
+			cmdlen = fread(ps[found].name, 1, sizeof(ps[found].name), pcmd);
+			ps[found].name[cmdlen] = '\0';
+			fclose(pcmd);
+			++found;
+		}
 		en = readdir(pdir);
-		++found;
 	}
 	closedir(pdir);
 #endif
