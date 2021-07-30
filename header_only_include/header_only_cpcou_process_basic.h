@@ -5,11 +5,46 @@
 #else
 #include<dirent.h>
 #include<signal.h>
+#include<unistd.h>
 #endif
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 #include<cpcou_process_basic.h>
+
+/**
+ * Creates a process
+ */
+cpcou_process cpcou_create_process(const char *cmd)
+{
+	cpcou_process proc;
+	int p_in[2], p_out[2];
+	int p_err[2];
+	pipe(p_in);
+	pipe(p_out);
+	pipe(p_err);
+	cpcou_pid_t pid = fork();
+	if(pid == 0)
+	{
+		dup2(p_in[0], STDIN_FILENO);
+		dup2(p_out[1], STDOUT_FILENO);
+		dup2(p_err[1], STDERR_FILENO);
+		system(cmd);
+		exit(0);
+	}
+	else
+	{
+		close(p_in[0]);
+		close(p_out[1]);
+		close(p_err[1]);
+		proc.id = pid;
+		strcpy(proc.name, cmd);
+		proc.pstdin = p_in[1];
+		proc.pstdout = p_out[0];
+		proc.pstderr = p_err[0];
+	}
+	return proc;
+}
 
 /**
  * Get all processes, returns the number of processes found
@@ -37,6 +72,9 @@ size_t cpcou_get_processes(pcpcou_process ps)
 			cmdlen = fread(ps[found].name, 1, sizeof(ps[found].name), pcmd);
 			ps[found].name[cmdlen] = '\0';
 			fclose(pcmd);
+			ps[found].pstdin = -1;
+			ps[found].pstdout = -1;
+			ps[found].pstderr = -1;
 			++found;
 		}
 		en = readdir(pdir);

@@ -9,7 +9,18 @@ typedef struct cpcou____process
 {
 	cpcou_pid_t id;
 	char name[MAX_PATH_LEN];
+#ifdef _WIN32
+	HANDLE
+#else
+	int
+#endif
+	pstdin, pstdout, pstderr;
 }cpcou_process, *pcpcou_process;
+
+/**
+ * Creates a process
+ */
+cpcou_process cpcou_create_process(const char *cmd);
 
 /**
  * Get all processes, returns the number of processes found
