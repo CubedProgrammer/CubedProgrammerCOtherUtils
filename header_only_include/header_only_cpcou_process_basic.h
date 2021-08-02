@@ -2,6 +2,8 @@
 #ifndef Included_header_only_cpcou_process_basic_h
 #define Included_header_only_cpcou_process_basic_h
 #ifdef _WIN32
+#include<windows.h>
+#include<psapi.h>
 #else
 #include<dirent.h>
 #include<signal.h>
@@ -18,6 +20,8 @@
 cpcou_process cpcou_create_process(const char *cmd)
 {
 	cpcou_process proc;
+#ifdef _WIN32
+#else
 	int p_in[2], p_out[2];
 	int p_err[2];
 	pipe(p_in);
@@ -43,6 +47,7 @@ cpcou_process cpcou_create_process(const char *cmd)
 		proc.pstdout = p_out[0];
 		proc.pstderr = p_err[0];
 	}
+#endif
 	return proc;
 }
 
@@ -54,6 +59,24 @@ size_t cpcou_get_processes(pcpcou_process ps)
 	size_t found = 0, cmdlen = 0;
 	char pdn[29];
 #ifdef _WIN32
+	DWORD pids[1024], sz;
+	EnumProcesses(pids, sizeof(pids), &sz);
+	DWORD cnt = sz / sizeof(DWORD);
+	HANDLE ph;
+	HMODULE mod;
+	DWORD tmp;
+	for(DWORD i = 0; i < cnt; ++i)
+	{
+		ph = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, pids[i]);
+		if(EnumProcessModules(ph, &mod, sizeof(mod), &tmp))
+			GetModuleBaseName(ph, mod, ps[i].name, sizeof(ps[i].name));
+		ps[i].id = pids[i];
+		ps[i].pstdin = NULL;
+		ps[i].pstdout = NULL;
+		ps[i].pstderr = NULL;
+		CloseHandle(ph);
+	}
+	found = cnt;
 #else
 	DIR *pdir = opendir("/proc");
 	struct dirent *en = readdir(pdir);

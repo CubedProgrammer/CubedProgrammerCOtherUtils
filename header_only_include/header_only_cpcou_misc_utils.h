@@ -109,9 +109,9 @@ int cpcou_lcg_next(struct cpcou_lcg *gen)
 /**
  * Get the next random 64-bit integer of an LCG
  */
-int64_t cpcou_lcg_nextl(struct cpcou_lcg *gen)
+long long cpcou_lcg_nextl(struct cpcou_lcg *gen)
 {
-	return((int64_t) cpcou_lcg_next(gen) << 32) | (unsigned) cpcou_lcg_next(gen);
+	return((long long) cpcou_lcg_next(gen) << 32) | (unsigned) cpcou_lcg_next(gen);
 }
 
 /**
@@ -119,7 +119,7 @@ int64_t cpcou_lcg_nextl(struct cpcou_lcg *gen)
  */
 double cpcou_lcg_nextf(struct cpcou_lcg *gen)
 {
-	int64_t x = cpcou_lcg_nextl(gen);
+	long long x = cpcou_lcg_nextl(gen);
 	return(double) (x & 0xfffffffffffffll) / 0xfffffffffffffll;
 }
 

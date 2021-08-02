@@ -52,7 +52,7 @@ int cpcou_lcg_next(struct cpcou_lcg *gen);
 /**
  * Get the next random 64-bit integer of an LCG
  */
-int64_t cpcou_lcg_nextl(struct cpcou_lcg *gen);
+long long cpcou_lcg_nextl(struct cpcou_lcg *gen);
 
 /**
  * Gets the next random float of an LCG

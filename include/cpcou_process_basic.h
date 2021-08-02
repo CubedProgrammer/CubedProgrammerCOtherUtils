@@ -1,6 +1,9 @@
 #ifndef __cplusplus
 #ifndef Included_cpcou_process_basic_h
 #define Included_cpcou_process_basic_h
+#ifdef _WIN32
+#include<windows.h>
+#endif
 #include<cpcou_file_system.h>
 
 typedef int cpcou_pid_t;

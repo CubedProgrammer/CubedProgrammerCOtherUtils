@@ -505,7 +505,7 @@ void cpcou_unhide_file(const char *name)
 const char *cpcou_get_extension(const struct cpcou_file_info *dat)
 {
 	const char *ptr = dat->abspth + dat->plen;
-	for(int64_t i = dat->plen - 1; i >= 0; --i)
+	for(long long i = dat->plen - 1; i >= 0; --i)
 	{
 		if(dat->abspth[i] == '.')
 		{
