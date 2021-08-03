@@ -2,7 +2,24 @@
 #ifndef Included_header_only_cpcou_misc_utils_h
 #define Included_header_only_cpcou_misc_utils_h
 #include<string.h>
+#ifdef _WIN32
+#include<windows.h>
+#else
+#include<unistd.h>
+#endif
 #include<cpcou_misc_utils.h>
+
+/**
+ * Get the name of the running program
+ */
+size_t cpcou_get_exe(char *buf, size_t sz)
+{
+#ifdef _WIN32
+	return GetModuleFileNameA(GetModuleHandleA(NULL), buf, sz);
+#else
+	return readlink("/proc/self/exe", buf, sz);
+#endif
+}
 
 /**
  * Swaps the data in two blocks of memory

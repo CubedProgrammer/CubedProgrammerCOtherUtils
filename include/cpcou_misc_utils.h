@@ -15,6 +15,11 @@ typedef struct cpcou_lcg
 }cpcou_lcg;
 
 /**
+ * Get the name of the running program
+ */
+size_t cpcou_get_exe(char *buf, size_t sz);
+
+/**
  * Swaps the data in two blocks of memory
  */
 void cpcou_swap_mem(void *x, void *y, size_t sz);
