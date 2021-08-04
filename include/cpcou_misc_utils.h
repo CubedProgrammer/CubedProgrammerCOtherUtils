@@ -15,6 +15,11 @@ typedef struct cpcou_lcg
 }cpcou_lcg;
 
 /**
+ * Remove characters from the last line of console output
+ */
+void cpcou_stdout_erase(size_t chars);
+
+/**
  * Get the name of the running program
  */
 size_t cpcou_get_exe(char *buf, size_t sz);

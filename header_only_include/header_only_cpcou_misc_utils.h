@@ -1,6 +1,7 @@
 #ifndef __cplusplus
 #ifndef Included_header_only_cpcou_misc_utils_h
 #define Included_header_only_cpcou_misc_utils_h
+#include<stdio.h>
 #include<string.h>
 #ifdef _WIN32
 #include<windows.h>
@@ -8,6 +9,19 @@
 #include<unistd.h>
 #endif
 #include<cpcou_misc_utils.h>
+
+/**
+ * Remove characters from the last line of console output
+ */
+void cpcou_stdout_erase(size_t chars)
+{
+	for(size_t i = 0; i < chars; ++i)
+		fputc('\b', stdout);
+	for(size_t i = 0; i < chars; ++i)
+		fputc(' ', stdout);
+	for(size_t i = 0; i < chars; ++i)
+		fputc('\b', stdout);
+}
 
 /**
  * Get the name of the running program
