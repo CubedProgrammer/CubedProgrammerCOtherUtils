@@ -8,11 +8,30 @@
 #include<dirent.h>
 #include<signal.h>
 #include<unistd.h>
+#include<sys/wait.h>
 #endif
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 #include<cpcou_process_basic.h>
+
+/**
+ * Wait for a child process to exit, returns exit code
+ */
+int cpcou_wait_process(cpcou_pid_t id)
+{
+#ifdef _WIN32
+	HANDLE ph = OpenProcess(PROCESS_QUERY_INFORMATION | SYNCHRONIZE, FALSE, id);
+	WaitForSingleObject(ph, INFINITE);
+	DWORD status;
+	GetExitCodeProcess(ph, &status);
+#else
+	int status;
+	waitpid(id, &status, 0);
+	status = WEXITSTATUS(status);
+#endif
+	return status;
+}
 
 /**
  * Creates a process

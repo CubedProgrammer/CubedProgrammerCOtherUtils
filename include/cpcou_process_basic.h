@@ -21,6 +21,11 @@ typedef struct cpcou____process
 }cpcou_process, *pcpcou_process;
 
 /**
+ * Wait for a child process to exit, returns exit code
+ */
+int cpcou_wait_process(cpcou_pid_t id);
+
+/**
  * Creates a process
  */
 cpcou_process cpcou_create_process(const char *cmd);
