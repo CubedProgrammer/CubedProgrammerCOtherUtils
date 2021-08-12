@@ -43,7 +43,7 @@ int cpcou____proc_close_stream(void *obj)
 /**
  * Get the stdin of a process
  */
-ostream cpcou_process_stdin(pcpcou_process proc)
+cpcio_ostream cpcou_process_stdin(pcpcou_process proc)
 {
 #ifdef _WIN32
 	return cpcio_open_ostream(proc->pstdin, cpcou____proc_wr, cpcou____proc_close_stream);
@@ -55,7 +55,7 @@ ostream cpcou_process_stdin(pcpcou_process proc)
 /**
  * Get the stdout of a process
  */
-istream cpcou_process_stdout(pcpcou_process proc)
+cpcio_istream cpcou_process_stdout(pcpcou_process proc)
 {
 #ifdef _WIN32
 	return cpcio_open_istream(proc->pstdout, cpcou____proc_rd, cpcou____proc_close_stream);
@@ -67,7 +67,7 @@ istream cpcou_process_stdout(pcpcou_process proc)
 /**
  * Get the stderr of a process
  */
-istream cpcou_process_stderr(pcpcou_process proc)
+cpcio_istream cpcou_process_stderr(pcpcou_process proc)
 {
 #ifdef _WIN32
 	return cpcio_open_istream(proc->pstderr, cpcou____proc_rd, cpcou____proc_close_stream);
