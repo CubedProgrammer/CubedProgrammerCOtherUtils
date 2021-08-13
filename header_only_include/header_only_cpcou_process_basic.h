@@ -40,6 +40,44 @@ cpcou_process cpcou_create_process(const char *cmd)
 {
 	cpcou_process proc;
 #ifdef _WIN32
+	HANDLE p_in[2], p_out[2];
+	HANDLE p_err[2];
+	SECURITY_ATTRIBUTES attr;
+	attr.nLength = sizeof(attr);
+	attr.lpSecurityDescriptor = NULL;
+	attr.bInheritHandle = TRUE;
+	CreatePipe(p_in, p_in + 1, &attr, 0);
+	CreatePipe(p_out, p_out + 1, &attr, 0);
+	CreatePipe(p_err, p_err + 1, &attr, 0);
+	SetHandleInformation(p_in[1], HANDLE_FLAG_INHERIT, 0);
+	SetHandleInformation(p_out[0], HANDLE_FLAG_INHERIT, 0);
+	SetHandleInformation(p_err[0], HANDLE_FLAG_INHERIT, 0);
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+	ZeroMemory(&si, sizeof(si));
+	ZeroMemory(&pi, sizeof(pi));
+	si.cb = sizeof(si);
+	si.hStdInput = p_in[0];
+	si.hStdOutput = p_out[1];
+	si.hStdError = p_err[1];
+	si.dwFlags |= STARTF_USESTDHANDLES;
+	char sent_cmd[MAX_PATH];
+	strcpy(sent_cmd, cmd);
+	BOOL succ = CreateProcess(NULL, sent_cmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
+	if(!succ)
+		puts("Process could not be created.");
+	CloseHandle(p_in[0]);
+	CloseHandle(p_out[1]);
+	CloseHandle(p_err[1]);
+	proc.id = pi.dwProcessId;
+	HANDLE ph = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, proc.id);
+	HMODULE mod;
+	DWORD tmp;
+	if(EnumProcessModules(ph, &mod, sizeof(mod), &tmp))
+		GetModuleBaseName(ph, mod, proc.name, sizeof(proc.name));
+	proc.pstdin = p_in[1];
+	proc.pstdout = p_out[0];
+	proc.pstderr = p_err[0];
 #else
 	int p_in[2], p_out[2];
 	int p_err[2];
