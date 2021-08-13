@@ -14,6 +14,9 @@
 int cpcou____proc_rd(void *src, char *buf, size_t cnt)
 {
 #ifdef _WIN32
+	DWORD rd;
+	ReadFile(src, buf, cnt, &rd, NULL);
+	return rd;
 #else
 	return read(*(int*)src, buf, cnt);
 #endif
@@ -25,6 +28,9 @@ int cpcou____proc_rd(void *src, char *buf, size_t cnt)
 int cpcou____proc_wr(void *dest, const char *buf, size_t cnt)
 {
 #ifdef _WIN32
+	DWORD wr;
+	WriteFile(dest, buf, cnt, &wr, NULL);
+	return wr;
 #else
 	return write(*(int*)dest, buf, cnt);
 #endif
@@ -36,6 +42,7 @@ int cpcou____proc_wr(void *dest, const char *buf, size_t cnt)
 int cpcou____proc_close_stream(void *obj)
 {
 #ifdef _WIN32
+	return CloseHandle(obj) == 0 ? -1 : 0;
 #else
 	return close(*(int*)obj);
 #endif
