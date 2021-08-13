@@ -90,8 +90,7 @@ cpcou_process cpcou_create_process(const char *cmd)
 		dup2(p_in[0], STDIN_FILENO);
 		dup2(p_out[1], STDOUT_FILENO);
 		dup2(p_err[1], STDERR_FILENO);
-		system(cmd);
-		exit(0);
+		exit(WEXITSTATUS(system(cmd)));
 	}
 	else
 	{
@@ -113,8 +112,7 @@ cpcou_process cpcou_create_process(const char *cmd)
  */
 size_t cpcou_get_processes(pcpcou_process ps)
 {
-	size_t found = 0, cmdlen = 0;
-	char pdn[29];
+	size_t found = 0;
 #ifdef _WIN32
 	DWORD pids[1024], sz;
 	EnumProcesses(pids, sizeof(pids), &sz);
@@ -135,6 +133,8 @@ size_t cpcou_get_processes(pcpcou_process ps)
 	}
 	found = cnt;
 #else
+	size_t cmdlen;
+	char pdn[29];
 	DIR *pdir = opendir("/proc");
 	struct dirent *en = readdir(pdir);
 	FILE *pcmd;

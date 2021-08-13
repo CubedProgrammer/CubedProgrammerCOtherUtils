@@ -2,6 +2,7 @@
 #ifndef Included_header_only_cpcou_process_streams_h
 #define Included_header_only_cpcou_process_streams_h
 #ifdef _WIN32
+#include<windows.h>
 #else
 #include<unistd.h>
 #endif

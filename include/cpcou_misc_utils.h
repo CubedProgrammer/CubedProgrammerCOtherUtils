@@ -2,6 +2,7 @@
 #ifndef Included_cpcou_misc_utils_h
 #define Included_cpcou_misc_utils_h
 #include<stdlib.h>
+#include<string.h>
 #define cpcou_memset_macro(typename, __arr__, val, cnt)do{typename cpcou____tmp = val;cpcou_fill_mem(__arr__, &cpcou____tmp, sizeof(typename), cnt);}while(0)
 #define cpcou_reverse___arr__(__arr__, size)for(size_t i = 0; i < ((size) / 2);i++)cpcou_swap_mem(__arr__ + i, __arr__ + size - i - 1, sizeof((__arr__)[0]))
 #define cpcou_swap_var(__x__, __y__)cpcou_swap_mem(&(__x__), &(__y__), sizeof(__x__))
@@ -10,10 +11,14 @@
 #define cpcou_become_str(__t__)#__t__
 #define cpcou_raw_puts(__t__)puts(#__t__)
 #define cpcou_raw_printf(__t__, ...)printf(#__t__, __VA_ARGS__)
+#define cpcou_raw_print(__t__)printf(#__t__)
 #define cpcou_raw_scanf(__t__, ...)scanf(#__t__, __VA_ARGS__)
-#define cpcou_raw_fputs(__t__, __stream__)puts(#__t__, __stream__)
-#define cpcou_raw_fprintf(__stream__, __t__, ...)printf(__stream__, #__t__, __VA_ARGS__)
-#define cpcou_raw_fscanf(__stream__, __t__, ...)scanf(__stream__, #__t__, __VA_ARGS__)
+#define cpcou_raw_fputs(__t__, __stream__)fputs(#__t__, __stream__)
+#define cpcou_raw_fprint(__stream__, __t__)fprintf(__stream__, #__t__)
+#define cpcou_raw_fprintf(__stream__, __t__, ...)fprintf(__stream__, #__t__, __VA_ARGS__)
+#define cpcou_raw_fscanf(__stream__, __t__, ...)fscanf(__stream__, #__t__, __VA_ARGS__)
+#define cpcou_zero_var(__v__)memset(&__v__, 0, sizeof(__v__))
+#define cpcou_one_var(__v__)memset(&__v__, -1, sizeof(__v__))
 
 typedef struct cpcou_lcg
 {
