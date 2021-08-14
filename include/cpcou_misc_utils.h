@@ -26,6 +26,32 @@ typedef struct cpcou_lcg
 	long long unsigned a, m, c;
 }cpcou_lcg;
 
+#ifdef _WIN32
+typedef void *cpcou_pipe_t;
+#else
+typedef int cpcou_pipe_t;
+#endif
+
+/**
+ * Creates a pipe, returns zero on success
+ */
+int cpcou_pipe(cpcou_pipe_t *r, cpcou_pipe_t *w);
+
+/**
+ * Read from a pipe, returns number of bytes read
+ */
+size_t cpcou_pipe_read(cpcou_pipe_t pipe, void *buf, size_t sz);
+
+/**
+ * Writes to a pipe, returns number of bytes wrote
+ */
+size_t cpcou_pipe_write(cpcou_pipe_t pipe, const void *buf, size_t sz);
+
+/**
+ * Closes pipes, return zero on success
+ */
+int cpcou_close_pipe(cpcou_pipe_t pipe);
+
 /**
  * Remove characters from the last line of console output
  */

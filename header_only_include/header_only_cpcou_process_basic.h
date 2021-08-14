@@ -142,7 +142,7 @@ size_t cpcou_get_processes(pcpcou_process ps)
 	while(en != NULL)
 	{
 		fc = en->d_name[0];
-		if(fc > '0' && fc < '9')
+		if(fc >= '0' && fc <= '9')
 		{
 			ps[found].id = atoi(en->d_name);
 			strcpy(pdn, "/proc/");

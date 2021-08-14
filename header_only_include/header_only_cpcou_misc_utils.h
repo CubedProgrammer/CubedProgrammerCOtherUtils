@@ -11,6 +11,62 @@
 #include<cpcou_misc_utils.h>
 
 /**
+ * Creates a pipe, returns zero on success
+ */
+int cpcou_pipe(cpcou_pipe_t *r, cpcou_pipe_t *w)
+{
+#ifdef _WIN32
+	return CreatePipe(r, w, NULL, 0) == 0 ? -1 : 0;
+#else
+	int pipes[2];
+	int succ = pipe(pipes);
+	*r = pipes[0];
+	*w = pipes[1];
+	return succ;
+#endif
+}
+
+/**
+ * Read from a pipe, returns number of bytes read
+ */
+size_t cpcou_pipe_read(cpcou_pipe_t pipe, void *buf, size_t sz)
+{
+#ifdef _WIN32
+	DWORD bc;
+	ReadFile(pipe, buf, sz, &bc, NULL);
+	return bc;
+#else
+	return read(pipe, buf, sz);
+#endif
+}
+
+/**
+ * Writes to a pipe, returns number of bytes wrote
+ */
+size_t cpcou_pipe_write(cpcou_pipe_t pipe, const void *buf, size_t sz)
+{
+#ifdef _WIN32
+	DWORD bc;
+	WriteFile(pipe, buf, sz, &bc, NULL);
+	return bc;
+#else
+	return write(pipe, buf, sz);
+#endif
+}
+
+/**
+ * Closes pipes, return zero on success
+ */
+int cpcou_close_pipe(cpcou_pipe_t pipe)
+{
+#ifdef _WIN32
+	return CloseHandle(pipe) == 0 ? -1 : 0;
+#else
+	return close(pipe);
+#endif
+}
+
+/**
  * Remove characters from the last line of console output
  */
 void cpcou_stdout_erase(size_t chars)
