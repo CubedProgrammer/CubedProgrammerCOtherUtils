@@ -17,12 +17,26 @@ int cpcou_pipe(cpcou_pipe_t *r, cpcou_pipe_t *w)
 {
 #ifdef _WIN32
 	return CreatePipe(r, w, NULL, 0) == 0 ? -1 : 0;
-#else
+#elif defined(__linux__) || defined(__APPLE__)
 	int pipes[2];
 	int succ = pipe(pipes);
 	*r = pipes[0];
 	*w = pipes[1];
 	return succ;
+#else
+	cpcou_pipe_t p = malloc(sizeof(*p));
+	if(p == NULL)
+		return-1;
+	else
+	{
+		*r = p;
+		*w = p;
+		p->sz = 3 << 20;
+		p->dat = malloc(p->sz);
+		p->ind = 0;
+		p->cnt = 0;
+		return p->dat == NULL ? -1 : 0;
+	}
 #endif
 }
 
@@ -35,8 +49,21 @@ size_t cpcou_pipe_read(cpcou_pipe_t pipe, void *buf, size_t sz)
 	DWORD bc;
 	ReadFile(pipe, buf, sz, &bc, NULL);
 	return bc;
-#else
+#elif defined(__linux__) || defined(__APPLE__)
 	return read(pipe, buf, sz);
+#else
+	struct timespec second;
+	second.tv_sec = 1;
+	second.tv_nsec = 0;
+	while(pipe->cnt == 0)
+		thrd_sleep(&second, NULL);
+	size_t bc = sz < pipe->cnt ? sz : pipe->cnt;
+	memcpy(buf, (char*)pipe->dat + pipe->ind, bc);
+	pipe->cnt -= bc;
+	pipe->ind += bc;
+	if(pipe->cnt == 0)
+		pipe->ind = 0;
+	return bc;
 #endif
 }
 
@@ -49,8 +76,28 @@ size_t cpcou_pipe_write(cpcou_pipe_t pipe, const void *buf, size_t sz)
 	DWORD bc;
 	WriteFile(pipe, buf, sz, &bc, NULL);
 	return bc;
-#else
+#elif defined(__linux__) || defined(__APPLE__)
 	return write(pipe, buf, sz);
+#else
+	if(pipe->sz - pipe->cnt < sz)
+	{
+		void *tmp = malloc(pipe->cnt + sz);
+		pipe->sz = sz + pipe->cnt;
+		memcpy(tmp, (char*)pipe->dat + pipe->ind, pipe->cnt);
+		free(pipe->dat);
+		pipe->dat = tmp;
+		pipe->ind = 0;
+	}
+	else if(pipe->sz - pipe->cnt - pipe->ind < sz)
+	{
+		volatile char *cbuf = pipe->dat;
+		for(size_t i = 0; i < pipe->cnt; ++i)
+			cbuf[i] = cbuf[i + pipe->ind];
+		pipe->ind = 0;
+	}
+	memcpy((char*)pipe->dat + pipe->cnt + pipe->ind, buf, sz);
+	pipe->cnt += sz;
+	return sz;
 #endif
 }
 
@@ -61,8 +108,12 @@ int cpcou_close_pipe(cpcou_pipe_t pipe)
 {
 #ifdef _WIN32
 	return CloseHandle(pipe) == 0 ? -1 : 0;
-#else
+#elif defined(__linux__) || defined(__APPLE__)
 	return close(pipe);
+#else
+	free(pipe->dat);
+	free(pipe);
+	return 0;
 #endif
 }
 

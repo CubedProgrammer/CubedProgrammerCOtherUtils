@@ -28,8 +28,16 @@ typedef struct cpcou_lcg
 
 #ifdef _WIN32
 typedef void *cpcou_pipe_t;
-#else
+#elif defined(__linux__) || defined(__APPLE__)
 typedef int cpcou_pipe_t;
+#else
+#include<threads.h>
+typedef struct cpcou_pipe
+{
+	void *dat;
+	size_t sz;
+	size_t cnt, ind;
+}*cpcou_pipe_t;
 #endif
 
 /**
