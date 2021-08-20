@@ -6,9 +6,39 @@
 #ifdef _WIN32
 #include<windows.h>
 #else
+#include<arpa/inet.h>
+#include<netdb.h>
 #include<unistd.h>
 #endif
 #include<cpcou_misc_utils.h>
+
+/**
+ * Gets the ip address by hostname, cbuf should be able to store at least sixteen characters
+ * Returns zero on success
+ */
+int cpcou_host_to_ip(const char *restrict hostname, char *restrict cbuf)
+{
+#ifdef _WIN32
+#else
+	struct addrinfo hints;
+	struct addrinfo *addresses;
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_flags = AI_CANONNAME;
+	int succ = getaddrinfo(hostname, NULL, &hints, &addresses);
+	struct sockaddr_in *addr;
+	if(succ == 0)
+	{
+		for(struct addrinfo *n = addresses; n != NULL; n = n->ai_next)
+		{
+			if(((struct sockaddr_in *)n->ai_addr)->sin_addr.s_addr)
+				addr = (struct sockaddr_in *)n->ai_addr;
+		}
+		char *addrname = inet_ntoa(addr->sin_addr);
+		strcpy(cbuf, addrname);
+	}
+	return succ;
+#endif
+}
 
 /**
  * Creates a pipe, returns zero on success

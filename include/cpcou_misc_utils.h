@@ -41,6 +41,12 @@ typedef struct cpcou_pipe
 #endif
 
 /**
+ * Gets the ip address by hostname, cbuf should be able to store at least sixteen characters
+ * Returns zero on success
+ */
+int cpcou_host_to_ip(const char *hostname, char *cbuf);
+
+/**
  * Creates a pipe, returns zero on success
  */
 int cpcou_pipe(cpcou_pipe_t *r, cpcou_pipe_t *w);
