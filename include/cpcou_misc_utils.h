@@ -41,6 +41,12 @@ typedef struct cpcou_pipe
 #endif
 
 /**
+ * Get names of environment variables, returned pointer is heap allocated
+ * Do not attempt to free the pointers to individual strings
+ */
+char **cpcou_getenv_names(void);
+
+/**
  * Gets the ip address by hostname, cbuf should be able to store at least sixteen characters
  * Returns zero on success
  */

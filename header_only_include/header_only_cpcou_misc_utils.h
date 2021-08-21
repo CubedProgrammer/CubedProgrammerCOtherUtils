@@ -12,6 +12,41 @@
 #endif
 #include<cpcou_misc_utils.h>
 
+#ifndef _WIN32
+extern char **environ;
+#endif
+
+/**
+ * Get names of environment variables, returned pointer is heap allocated
+ * Do not attempt to free the pointers to individual strings
+ */
+char **cpcou_getenv_names(void)
+{
+	char **env;
+#ifdef _WIN32
+	env = _environ;
+#else
+	env = environ;
+#endif
+	size_t cnt = 0, len = 0;
+	for(char **it = env; *it != NULL; ++it)
+		++cnt, len += strchr(*it, '=') - *it;
+	char **res = malloc(len + cnt + (cnt + 1) * sizeof(char *));
+	char *curr = (char *)(res + cnt + 1);
+	size_t ind = 0;
+	for(char **it = env; *it != NULL; ++it)
+	{
+		len = strchr(*it, '=') - *it;
+		memcpy(curr, *it, len);
+		curr[len] = '\0';
+		res[ind] = curr;
+		curr += len + 1;
+		++ind;
+	}
+	res[ind] = NULL;
+	return res;
+}
+
 /**
  * Gets the ip address by hostname, cbuf should be able to store at least sixteen characters
  * Returns zero on success
