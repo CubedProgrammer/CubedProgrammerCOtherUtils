@@ -13,7 +13,34 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<cpcou_misc_utils.h>
 #include<cpcou_process_basic.h>
+
+/**
+ * Get the executable file of a process
+ */
+size_t cpcou_proc_exe(cpcou_pid_t id, char *restrict cbuf, size_t sz)
+{
+#ifdef _WIN32
+#else
+	char idstr[11];
+	size_t ind = 0;
+	while(id != 0)
+	{
+		idstr[ind] = '0' + id % 10;
+		id /= 10;
+		++ind;
+	}
+	idstr[ind] = '\0';
+	cpcou_reverse_arr(idstr, ind);
+	// process path
+	char pp[21];
+	strcpy(pp, "/proc/");
+	strcpy(pp + 6, idstr);
+	strcpy(pp + ind + 6, "/exe");
+	return readlink(pp, cbuf, sz);
+#endif
+}
 
 /**
  * Wait for a child process to exit, returns exit code

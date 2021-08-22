@@ -4,9 +4,9 @@
 #include<stdlib.h>
 #include<string.h>
 #define cpcou_memset_macro(typename, __arr__, val, cnt)do{typename cpcou____tmp = val;cpcou_fill_mem(__arr__, &cpcou____tmp, sizeof(typename), cnt);}while(0)
-#define cpcou_reverse___arr__(__arr__, size)for(size_t i = 0; i < ((size) / 2);i++)cpcou_swap_mem(__arr__ + i, __arr__ + size - i - 1, sizeof((__arr__)[0]))
+#define cpcou_reverse_arr(__arr__, size)for(size_t i = 0; i < ((size) / 2);i++)cpcou_swap_mem(__arr__ + i, __arr__ + size - i - 1, sizeof((__arr__)[0]))
 #define cpcou_swap_var(__x__, __y__)cpcou_swap_mem(&(__x__), &(__y__), sizeof(__x__))
-#define cpcou_next_perm(__arr__, size, compar)do{size_t ind = 0, next;for(size_t i = size - 1; i > 0; i--){if(compar((__arr__)[i - 1], (__arr__)[i])){ind = i; i = 1;}}cpcou_reverse___arr__(__arr__ + ind, size - ind);if(ind > 0){--ind;for(size_t i = ind; i < size; i++){if(compar((__arr__)[ind], (__arr__)[i])){next = i;i = size;}}cpcou_swap_mem(__arr__ + ind, __arr__ + next, sizeof((__arr__)[0]));}}while(0)
+#define cpcou_next_perm(__arr__, size, compar)do{size_t ind = 0, next;for(size_t i = size - 1; i > 0; i--){if(compar((__arr__)[i - 1], (__arr__)[i])){ind = i; i = 1;}}cpcou_reverse_arr(__arr__ + ind, size - ind);if(ind > 0){--ind;for(size_t i = ind; i < size; i++){if(compar((__arr__)[ind], (__arr__)[i])){next = i;i = size;}}cpcou_swap_mem(__arr__ + ind, __arr__ + next, sizeof((__arr__)[0]));}}while(0)
 #define cpcou_compar_macro(__x__, __y__)((__x__)<(__y__))
 #define cpcou_become_str(__t__)#__t__
 #define cpcou_raw_puts(__t__)puts(#__t__)

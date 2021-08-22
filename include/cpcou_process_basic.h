@@ -21,6 +21,11 @@ typedef struct cpcou____process
 }cpcou_process, *pcpcou_process;
 
 /**
+ * Get the executable file of a process
+ */
+size_t cpcou_proc_exe(cpcou_pid_t id, char *restrict cbuf, size_t sz);
+
+/**
  * Wait for a child process to exit, returns exit code
  */
 int cpcou_wait_process(cpcou_pid_t id);
