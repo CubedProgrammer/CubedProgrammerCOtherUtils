@@ -22,6 +22,16 @@
 size_t cpcou_proc_exe(cpcou_pid_t id, char *restrict cbuf, size_t sz)
 {
 #ifdef _WIN32
+	HANDLE proc_handle = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, id);
+	DWORD succ = -1;
+	if(proc_handle)
+	{
+		HMODULE hmod;
+		DWORD needed;
+		EnumProcessModules(proc_handle, &hmod, 1, &needed);
+		succ = GetModuleFileNameA(hmod, cbuf, sz);
+	}
+	return succ;
 #else
 	char idstr[11];
 	size_t ind = 0;
