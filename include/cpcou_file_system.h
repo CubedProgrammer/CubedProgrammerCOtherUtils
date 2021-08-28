@@ -71,6 +71,16 @@ time_t cpcou_last_stchange(const char *name);
 time_t cpcou_create_time(const char *name);
 
 /**
+ * Sets the last modify time of a file, returns zero on success
+ */
+int cpcou_set_modify_time(const char *name, time_t time);
+
+/**
+ * Sets the last access time of a file, returns zero on success
+ */
+int cpcou_set_access_time(const char *name, time_t time);
+
+/**
  * Get the size of all files in a folder
  */
 size_t cpcou_folder_size(const char *name);

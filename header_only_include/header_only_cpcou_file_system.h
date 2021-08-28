@@ -4,6 +4,7 @@
 #ifdef __linux__
 #include<dirent.h>
 #include<unistd.h>
+#include<utime.h>
 #elif defined _WIN32
 #include<windows.h>
 #endif
@@ -275,6 +276,46 @@ time_t cpcou_create_time(const char *name)
 }
 
 /**
+ * Sets the last modify time of a file, returns zero on success
+ */
+int cpcou_set_modify_time(const char *name, time_t time)
+{
+#ifdef _WIN32
+#else
+	struct stat dat;
+	int succ = stat(name, &dat);
+	if(succ == 0)
+	{
+		struct utimbuf utim;
+		utim.actime = dat.st_atime;
+		utim.modtime = time;
+		succ = utime(name, &utim);
+	}
+	return succ;
+#endif
+}
+
+/**
+ * Sets the last access time of a file, returns zero on success
+ */
+int cpcou_set_access_time(const char *name, time_t time)
+{
+#ifdef _WIN32
+#else
+	struct stat dat;
+	int succ = stat(name, &dat);
+	if(succ == 0)
+	{
+		struct utimbuf utim;
+		utim.actime = time;
+		utim.modtime = dat.st_mtime;
+		succ = utime(name, &utim);
+	}
+	return succ;
+#endif
+}
+
+/**
  * Get the size of all files in a folder
  */
 size_t cpcou_folder_size(const char *name)
@@ -404,7 +445,6 @@ void cpcou_create_folder(const char *name)
 	mkdir(name, S_IRWXU);
 #endif
 }
-
 
 /**
  * Creates a folder, parent folder need not exist
