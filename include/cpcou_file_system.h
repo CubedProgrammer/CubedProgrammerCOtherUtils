@@ -81,6 +81,11 @@ int cpcou_set_modify_time(const char *name, time_t time);
 int cpcou_set_access_time(const char *name, time_t time);
 
 /**
+ * Sets the access and modify time of a file, returns zero on success
+ */
+int cpcou_set_access_and_modify(const char *name, time_t acc, time_t mod);
+
+/**
  * Get the size of all files in a folder
  */
 size_t cpcou_folder_size(const char *name);
