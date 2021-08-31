@@ -128,6 +128,11 @@ long long cpcou_lcg_nextl(struct cpcou_lcg *gen);
 double cpcou_lcg_nextf(struct cpcou_lcg *gen);
 
 /**
+ * Generate random bytes and stores them in a buffer
+ */
+void cpcou_lcg_next_bytes(struct cpcou_lcg *gen, void *restrict buf, size_t sz);
+
+/**
  * Stable sorts an array of elements
  */
 void cpcou_stable_sort(void *buf, size_t cnt, size_t sz, int(*compar)(const void *, const void *));

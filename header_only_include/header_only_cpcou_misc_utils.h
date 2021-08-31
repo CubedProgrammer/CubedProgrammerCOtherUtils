@@ -327,6 +327,19 @@ double cpcou_lcg_nextf(struct cpcou_lcg *gen)
 }
 
 /**
+ * Generate random bytes and stores them in a buffer
+ */
+void cpcou_lcg_next_bytes(struct cpcou_lcg *gen, void *restrict buf, size_t sz)
+{
+	char *restrict cbuf = buf;
+	for(size_t i = 0; i < sz; )
+	{
+		for(unsigned x = cpcou_lcg_next(gen), n = 4 > sz - i ? sz - i : 4; n > 0; x >>= 8, --n, ++i)
+			cbuf[i] = x;
+	}
+}
+
+/**
  * Stable sorts an array of elements
  */
 void cpcou_stable_sort(void *buf, size_t cnt, size_t sz, int(*compar)(const void *, const void *))
