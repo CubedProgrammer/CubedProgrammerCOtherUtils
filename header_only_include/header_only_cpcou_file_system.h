@@ -7,6 +7,7 @@
 #include<utime.h>
 #elif defined _WIN32
 #include<windows.h>
+#include<sys/utime.h>
 #endif
 #include<stdio.h>
 #include<stdlib.h>
@@ -280,8 +281,6 @@ time_t cpcou_create_time(const char *name)
  */
 int cpcou_set_modify_time(const char *name, time_t time)
 {
-#ifdef _WIN32
-#else
 	struct stat dat;
 	int succ = stat(name, &dat);
 	if(succ == 0)
@@ -292,7 +291,6 @@ int cpcou_set_modify_time(const char *name, time_t time)
 		succ = utime(name, &utim);
 	}
 	return succ;
-#endif
 }
 
 /**
@@ -300,8 +298,6 @@ int cpcou_set_modify_time(const char *name, time_t time)
  */
 int cpcou_set_access_time(const char *name, time_t time)
 {
-#ifdef _WIN32
-#else
 	struct stat dat;
 	int succ = stat(name, &dat);
 	if(succ == 0)
@@ -312,7 +308,6 @@ int cpcou_set_access_time(const char *name, time_t time)
 		succ = utime(name, &utim);
 	}
 	return succ;
-#endif
 }
 
 /**
@@ -320,13 +315,10 @@ int cpcou_set_access_time(const char *name, time_t time)
  */
 int cpcou_set_access_and_modify(const char *name, time_t acc, time_t mod)
 {
-#ifdef _WIN32
-#else
 	struct utimbuf utim;
 	utim.actime = acc;
 	utim.modtime = mod;
 	return utime(name, &utim);
-#endif
 }
 
 /**
