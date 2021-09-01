@@ -20,6 +20,13 @@
 #define cpcou_zero_var(__v__)memset(&__v__, 0, sizeof(__v__))
 #define cpcou_one_var(__v__)memset(&__v__, -1, sizeof(__v__))
 
+typedef short cpcou_si;
+typedef short unsigned cpcou_su;
+typedef long cpcou_li;
+typedef long unsigned cpcou_lu;
+typedef long long cpcou_lli;
+typedef long long unsigned cpcou_llu;
+
 typedef struct cpcou_lcg
 {
 	long long unsigned seed;
@@ -39,6 +46,72 @@ typedef struct cpcou_pipe
 	size_t cnt, ind;
 }*cpcou_pipe_t;
 #endif
+
+/**
+ * Converts long long unsigned int to a string
+ * Base must be between 2 and 36, inclusive
+ */
+size_t cpcou_llutoa(cpcou_llu num, char *restrict str, int base);
+
+/**
+ * Converts long long int to a string
+ * Base must be between 2 and 36, inclusive
+ */
+size_t cpcou_lltoa(cpcou_lli num, char *restrict str, int base);
+
+/**
+ * Converts long unsigned int to a string
+ * Base must be between 2 and 36, inclusive
+ */
+static inline size_t cpcou_lutoa(cpcou_lu num, char *restrict str, int base)
+{
+	return cpcou_llutoa(num, str, base);
+}
+
+/**
+ * Converts long int to a string
+ * Base must be between 2 and 36, inclusive
+ */
+static inline size_t cpcou_ltoa(cpcou_li num, char *restrict str, int base)
+{
+	return cpcou_lltoa(num, str, base);
+}
+
+/**
+ * Converts unsigned int to a string
+ * Base must be between 2 and 36, inclusive
+ */
+static inline size_t cpcou_utoa(unsigned num, char *restrict str, int base)
+{
+	return cpcou_llutoa(num, str, base);
+}
+
+/**
+ * Converts int to a string
+ * Base must be between 2 and 36, inclusive
+ */
+static inline size_t cpcou_itoa(int num, char *restrict str, int base)
+{
+	return cpcou_lltoa(num, str, base);
+}
+
+/**
+ * Converts long unsigned int to a string
+ * Base must be between 2 and 36, inclusive
+ */
+static inline size_t cpcou_sutoa(cpcou_su num, char *restrict str, int base)
+{
+	return cpcou_llutoa(num, str, base);
+}
+
+/**
+ * Converts long int to a string
+ * Base must be between 2 and 36, inclusive
+ */
+static inline size_t cpcou_stoa(cpcou_si num, char *restrict str, int base)
+{
+	return cpcou_lltoa(num, str, base);
+}
 
 /**
  * Get names of environment variables, returned pointer is heap allocated

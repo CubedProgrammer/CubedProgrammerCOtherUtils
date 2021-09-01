@@ -16,6 +16,66 @@
 extern char **environ;
 #endif
 
+const char cpcou____digits[37] = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+/**
+ * Converts long long unsigned int to a string
+ * Base must be between 2 and 36, inclusive
+ */
+size_t cpcou_llutoa(cpcou_llu num, char *restrict str, int base)
+{
+	int dig, ind = 0;
+	while(num > 0)
+	{
+		dig = num % base;
+		num /= base;
+		str[ind] = cpcou____digits[dig];
+		++ind;
+	}
+	char tmp;
+	for(int i = 0; i < ind / 2; ++i)
+	{
+		tmp = str[i];
+		str[i] = str[ind - i - 1];
+		str[ind - i - 1] = tmp;
+	}
+	str[ind] = '\0';
+	return ind;
+}
+
+/**
+ * Converts long long int to a string
+ * Base must be between 2 and 36, inclusive
+ */
+size_t cpcou_lltoa(cpcou_lli num, char *restrict str, int base)
+{
+	int dig, ind = 0;
+	int nega = 0;
+	if(num < 0)
+	{
+		num = -num;
+		*str = '-';
+		++str;
+		nega = 1;
+	}
+	while(num > 0)
+	{
+		dig = num % base;
+		num /= base;
+		str[ind] = cpcou____digits[dig];
+		++ind;
+	}
+	char tmp;
+	for(int i = 0; i < ind / 2; ++i)
+	{
+		tmp = str[i];
+		str[i] = str[ind - i - 1];
+		str[ind - i - 1] = tmp;
+	}
+	str[ind] = '\0';
+	return ind + nega;
+}
+
 /**
  * Get names of environment variables, returned pointer is heap allocated
  * Do not attempt to free the pointers to individual strings
