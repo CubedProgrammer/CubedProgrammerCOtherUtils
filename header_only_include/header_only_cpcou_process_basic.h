@@ -25,7 +25,7 @@ int cpcou_proc_alive(cpcou_pid_t id)
 	HANDLE ph = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, id);
 	DWORD ev;
 	GetExitCodeProcess(ph, &ev);
-	return ev == STILL_ALIVE;
+	return ev == STILL_ACTIVE;
 #else
 	char path[17];
 	strcpy(path, "/proc/");
