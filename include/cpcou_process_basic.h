@@ -21,6 +21,11 @@ typedef struct cpcou____process
 }cpcou_process, *pcpcou_process;
 
 /**
+ * Returns false if process referred to by id is not running, true if it is
+ */
+int cpcou_proc_alive(cpcou_pid_t id);
+
+/**
  * Get the executable file of a process
  */
 size_t cpcou_proc_exe(cpcou_pid_t id, char *restrict cbuf, size_t sz);

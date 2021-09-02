@@ -17,6 +17,27 @@
 #include<cpcou_process_basic.h>
 
 /**
+ * Returns false if process referred to by id is not running, true if it is
+ */
+int cpcou_proc_alive(cpcou_pid_t id)
+{
+#ifdef _WIN32
+	HANDLE ph = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, id);
+	DWORD ev;
+	GetExitCodeProcess(ph, &ev);
+	return ev == STILL_ALIVE;
+#else
+	char path[17];
+	strcpy(path, "/proc/");
+	cpcou_itoa(id, path + 6, 10);
+	DIR *dir = opendir(path);
+	if(dir != NULL)
+		closedir(dir);
+	return dir != NULL;
+#endif
+}
+
+/**
  * Get the executable file of a process
  */
 size_t cpcou_proc_exe(cpcou_pid_t id, char *restrict cbuf, size_t sz)
