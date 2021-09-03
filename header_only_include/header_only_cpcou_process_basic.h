@@ -102,6 +102,35 @@ cpcou_process cpcou_create_process_with_redirects(const char *cmd, const char *f
 {
 	cpcou_process proc;
 #ifdef _WIN32
+	SECURITY_ATTRIBUTES attr;
+	attr.nLength = sizeof(attr);
+	attr.lpSecurityDescriptor = NULL;
+	attr.bInheritHandle = TRUE;
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+	ZeroMemory(&si, sizeof(si));
+	ZeroMemory(&pi, sizeof(pi));
+	si.cb = sizeof(si);
+	if(fin != NULL)
+		si.hStdInput = CreateFileA(fin, GENERIC_READ, 0, &attr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if(fout != NULL)
+		si.hStdOutput = CreateFileA(fout, GENERIC_WRITE, 0, &attr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if(ferr != NULL)
+		si.hStdError = CreateFileA(ferr, GENERIC_WRITE, 0, &attr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	si.dwFlags |= STARTF_USESTDHANDLES;
+	if(fout == INVALID_HANDLE_VALUE)
+		puts("stdout failed to redirect");
+	char sent_cmd[MAX_PATH];
+	strcpy(sent_cmd, cmd);
+	BOOL succ = CreateProcess(NULL, sent_cmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
+	if(!succ)
+		puts("Process could not be created.");
+	proc.id = pi.dwProcessId;
+	HANDLE ph = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, proc.id);
+	HMODULE mod;
+	DWORD tmp;
+	if(EnumProcessModules(ph, &mod, sizeof(mod), &tmp))
+		GetModuleBaseName(ph, mod, proc.name, sizeof(proc.name));
 #else
 	int pid = fork();
 	if(pid == 0)
