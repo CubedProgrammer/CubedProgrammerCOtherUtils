@@ -5,6 +5,8 @@
 #include<windows.h>
 #endif
 #include<cpcou_file_system.h>
+#define CPCOU_STDOUT_APPEND 0x01
+#define CPCOU_STDERR_APPEND 0x02
 
 typedef int cpcou_pid_t;
 
@@ -34,6 +36,14 @@ size_t cpcou_proc_exe(cpcou_pid_t id, char *restrict cbuf, size_t sz);
  * Wait for a child process to exit, returns exit code
  */
 int cpcou_wait_process(cpcou_pid_t id);
+
+/**
+ * Creates a process whose stdin, stdout and stderr are redirected to other files
+ * Use bitwise or combination of CPCOU_STDOUT_APPEND and CPCOU_STDERR_APPEND to write to the end of files
+ * Use NULL as a parameter to use parent stdin, stdout, or stderr
+ * To redirect output to pipes for parent process to access, use cpcou_create_process instead
+ */
+cpcou_process cpcou_create_process_with_redirects(const char *cmd, const char *fin, const char *fout, const char *ferr, int modes);
 
 /**
  * Creates a process

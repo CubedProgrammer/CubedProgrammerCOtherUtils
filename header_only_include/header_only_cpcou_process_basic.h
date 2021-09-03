@@ -6,6 +6,7 @@
 #include<psapi.h>
 #else
 #include<dirent.h>
+#include<fcntl.h>
 #include<signal.h>
 #include<unistd.h>
 #include<sys/wait.h>
@@ -89,6 +90,37 @@ int cpcou_wait_process(cpcou_pid_t id)
 	status = WEXITSTATUS(status);
 #endif
 	return status;
+}
+
+/**
+ * Creates a process whose stdin, stdout and stderr are redirected to other files
+ * Use bitwise or combination of CPCOU_STDOUT_APPEND and CPCOU_STDERR_APPEND to write to the end of files
+ * Use NULL as a parameter to use parent stdin, stdout, or stderr
+ * To redirect output to pipes for parent process to access, use cpcou_create_process instead
+ */
+cpcou_process cpcou_create_process_with_redirects(const char *cmd, const char *fin, const char *fout, const char *ferr, int modes)
+{
+	cpcou_process proc;
+#ifdef _WIN32
+#else
+	int pid = fork();
+	if(pid == 0)
+	{
+		if(fin != NULL)
+			dup2(open(fin, O_RDONLY), STDIN_FILENO);
+		if(fout != NULL)
+			dup2(open(fout, O_WRONLY | (modes & 1 ? O_APPEND : 0)), STDOUT_FILENO);
+		if(ferr != NULL)
+			dup2(open(ferr, O_WRONLY | (modes >> 1 ? O_APPEND : 0)), STDERR_FILENO);
+		exit(WEXITSTATUS(system(cmd)));
+	}
+	else
+	{
+		proc.id = pid;
+		strcpy(proc.name, cmd);
+	}
+#endif
+	return proc;
 }
 
 /**
