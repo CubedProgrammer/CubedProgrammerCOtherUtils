@@ -5,6 +5,7 @@
 #include<string.h>
 #ifdef _WIN32
 #include<windows.h>
+#include<ws2tcpip.h>
 #else
 #include<arpa/inet.h>
 #include<netdb.h>
@@ -113,12 +114,10 @@ char **cpcou_getenv_names(void)
  */
 int cpcou_host_to_ip(const char *restrict hostname, char *restrict cbuf)
 {
-#ifdef _WIN32
-#else
 	struct addrinfo hints;
 	struct addrinfo *addresses;
 	memset(&hints, 0, sizeof(hints));
-	hints.ai_flags = AI_CANONNAME;
+	//hints.ai_flags = AI_CANONNAME;
 	int succ = getaddrinfo(hostname, NULL, &hints, &addresses);
 	struct sockaddr_in *addr;
 	if(succ == 0)
@@ -132,7 +131,6 @@ int cpcou_host_to_ip(const char *restrict hostname, char *restrict cbuf)
 		strcpy(cbuf, addrname);
 	}
 	return succ;
-#endif
 }
 
 /**
