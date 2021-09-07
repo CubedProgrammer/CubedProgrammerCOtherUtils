@@ -8,6 +8,7 @@
 #include<ws2tcpip.h>
 #else
 #include<arpa/inet.h>
+#include<dirent.h>
 #include<netdb.h>
 #include<unistd.h>
 #endif
@@ -18,6 +19,47 @@ extern char **environ;
 #endif
 
 const char cpcou____digits[37] = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+/**
+ * Gets names of partitions of devices on the computer
+ * This will be /dev/sd.. on linux, or drive letters on windows
+ */
+char **cpcou_get_partitions(void)
+{
+#ifdef _WIN32
+#else
+	DIR *devdir = opendir("/dev");
+	struct dirent *en = readdir(devdir);
+	int len, cnt = 0;
+	size_t totlen = 0;
+	char *partnames[100];
+	while(en != NULL)
+	{
+		len = strlen(en->d_name);
+		if(len > 3 && strncmp(en->d_name, "sd", 2) == 0)
+		{
+			partnames[cnt] = malloc(len + 1);
+			strcpy(partnames[cnt], en->d_name);
+			++cnt;
+			totlen += len + 1;
+		}
+		en = readdir(devdir);
+	}
+	closedir(devdir);
+	char **strs = malloc((cnt + 1) * sizeof(char *) + totlen);
+	char *curr = (char *)(strs + cnt + 1);
+	for(int i = 0; i < cnt; ++i)
+	{
+		strs[i] = curr;
+		strcpy(curr, partnames[i]);
+		for(; *curr != '\0'; ++curr);
+		++curr;
+		free(partnames[i]);
+	}
+	strs[cnt] = NULL;
+	return strs;
+#endif
+}
 
 /**
  * Converts long long unsigned int to a string
@@ -117,7 +159,6 @@ int cpcou_host_to_ip(const char *restrict hostname, char *restrict cbuf)
 	struct addrinfo hints;
 	struct addrinfo *addresses;
 	memset(&hints, 0, sizeof(hints));
-	//hints.ai_flags = AI_CANONNAME;
 	int succ = getaddrinfo(hostname, NULL, &hints, &addresses);
 	struct sockaddr_in *addr;
 	if(succ == 0)

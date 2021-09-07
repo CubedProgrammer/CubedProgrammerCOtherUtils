@@ -48,6 +48,12 @@ typedef struct cpcou_pipe
 #endif
 
 /**
+ * Gets names of partitions of devices on the computer
+ * This will be /dev/sd.. on linux, or drive letters on windows
+ */
+char **cpcou_get_partitions(void);
+
+/**
  * Converts long long unsigned int to a string
  * Base must be between 2 and 36, inclusive
  */
