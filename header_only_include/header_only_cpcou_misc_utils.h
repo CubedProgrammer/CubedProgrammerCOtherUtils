@@ -26,12 +26,34 @@ const char cpcou____digits[37] = "0123456789abcdefghijklmnopqrstuvwxyz";
  */
 char **cpcou_get_partitions(void)
 {
+	int len, cnt = 0;
+	size_t totlen = 0;
 #ifdef _WIN32
+	char dletters[100];
+	GetLogicalDriveStringsA(sizeof(dletters), dletters);
+	for(char *it = dletters; *it != '\0';)
+	{
+		len = 0;
+		for(; *it != '\0'; ++it, ++len);
+		totlen += len + 1;
+		++it;
+		++cnt;
+	}
+	char **strs = malloc((cnt + 1) * sizeof(char *) + totlen);
+	char *curr = (char *)(strs + cnt + 1);
+	cnt = 0;
+	for(char *it = dletters; *it != '\0';)
+	{
+		strcpy(curr, it);
+		strs[cnt] = curr;
+		for(; *it != '\0'; ++it, ++curr);
+		++it;
+		++curr;
+		++cnt;
+	}
 #else
 	DIR *devdir = opendir("/dev");
 	struct dirent *en = readdir(devdir);
-	int len, cnt = 0;
-	size_t totlen = 0;
 	char *partnames[100];
 	while(en != NULL)
 	{
@@ -56,9 +78,9 @@ char **cpcou_get_partitions(void)
 		++curr;
 		free(partnames[i]);
 	}
+#endif
 	strs[cnt] = NULL;
 	return strs;
-#endif
 }
 
 /**
