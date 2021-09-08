@@ -114,15 +114,15 @@ cpcou_process cpcou_create_process_with_redirects(const char *cmd, const char *f
 	if(fin != NULL)
 		si.hStdInput = CreateFileA(fin, GENERIC_READ, 0, &attr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if(fout != NULL)
-		si.hStdOutput = CreateFileA(fout, GENERIC_WRITE, 0, &attr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		si.hStdOutput = CreateFileA(fout, modes & 1 ? FILE_APPEND_DATA : GENERIC_WRITE, 0, &attr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if(ferr != NULL)
-		si.hStdError = CreateFileA(ferr, GENERIC_WRITE, 0, &attr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		si.hStdError = CreateFileA(ferr, modes >> 1 ? FILE_APPEND_DATA : GENERIC_WRITE, 0, &attr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	si.dwFlags |= STARTF_USESTDHANDLES;
 	if(fout == INVALID_HANDLE_VALUE)
 		puts("stdout failed to redirect");
 	char sent_cmd[MAX_PATH];
 	strcpy(sent_cmd, cmd);
-	BOOL succ = CreateProcess(NULL, sent_cmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
+	BOOL succ = CreateProcessA(NULL, sent_cmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
 	if(!succ)
 		puts("Process could not be created.");
 	proc.id = pi.dwProcessId;
@@ -182,7 +182,7 @@ cpcou_process cpcou_create_process(const char *cmd)
 	si.dwFlags |= STARTF_USESTDHANDLES;
 	char sent_cmd[MAX_PATH];
 	strcpy(sent_cmd, cmd);
-	BOOL succ = CreateProcess(NULL, sent_cmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
+	BOOL succ = CreateProcessA(NULL, sent_cmd, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
 	if(!succ)
 		puts("Process could not be created.");
 	CloseHandle(p_in[0]);
