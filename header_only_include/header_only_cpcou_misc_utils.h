@@ -30,6 +30,12 @@ const char cpcou____digits[37] = "0123456789abcdefghijklmnopqrstuvwxyz";
 int cpcou_get_partition_space(const char *part, size_t *fr, size_t *tot)
 {
 #ifdef _WIN32
+	DWORD bytes, sectors;
+	DWORD dfr, dtot;
+	BOOL succ = GetDiskFreeSpaceA(part, &sectors, &bytes, &dfr, &dtot);
+	*fr = (size_t)bytes * sectors * dfr;
+	*tot = (size_t)bytes * sectors * dtot;
+	return succ ? 0 : -1;
 #else
 	char cbuf[20000];
 	int mf = open("/proc/self/mounts", O_RDONLY);
