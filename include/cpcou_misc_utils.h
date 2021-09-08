@@ -48,6 +48,13 @@ typedef struct cpcou_pipe
 #endif
 
 /**
+ * Gets the partition size and free space, returns zero on success
+ * For windows, part should be a drive letter followed by :\
+ * For linux, part should be sd followed by a letter, then a number, the /dev/ is implicit
+ */
+int cpcou_get_partition_space(const char *part, size_t *fr, size_t *tot);
+
+/**
  * Gets names of partitions of devices on the computer
  * This will be /dev/sd.. on linux, or drive letters on windows
  */

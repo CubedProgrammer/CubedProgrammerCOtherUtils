@@ -9,7 +9,9 @@
 #else
 #include<arpa/inet.h>
 #include<dirent.h>
+#include<fcntl.h>
 #include<netdb.h>
+#include<sys/statvfs.h>
 #include<unistd.h>
 #endif
 #include<cpcou_misc_utils.h>
@@ -19,6 +21,39 @@ extern char **environ;
 #endif
 
 const char cpcou____digits[37] = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+/**
+ * Gets the partition size and free space, returns zero on success
+ * For windows, part should be a drive letter followed by :\
+ * For linux, part should be sd followed by a letter, then a number, the /dev/ is implicit
+ */
+int cpcou_get_partition_space(const char *part, size_t *fr, size_t *tot)
+{
+#ifdef _WIN32
+#else
+	char cbuf[20000];
+	int mf = open("/proc/self/mounts", O_RDONLY);
+	read(mf, cbuf, sizeof(cbuf));
+	close(mf);
+	char search[12];
+	strcpy(search, "\n/dev/");
+	strcpy(search + 6, part);
+	char *ptr = strstr(cbuf, search);
+	int succ = -1;
+	if(ptr != NULL)
+	{
+		char *mpt = strchr(ptr, ' ') + 1;
+		char *mptend = strchr(mpt, ' ');
+		*mptend = '\0';
+		struct statvfs pdat;
+		statvfs(mpt, &pdat);
+		*fr = pdat.f_bsize * pdat.f_bfree;
+		*tot = pdat.f_frsize * pdat.f_blocks;
+		succ = 0;
+	}
+	return succ;
+#endif
+}
 
 /**
  * Gets names of partitions of devices on the computer
