@@ -104,6 +104,33 @@ static inline char **cpcou____dev_sd_filter(int *cnt, size_t mini, size_t maxi)
 char **cpcou_get_devices(void)
 {
 #ifdef _WIN32
+	char devname[2000];
+	int len, cnt = 0;
+	size_t totlen = 0;
+	HANDLE dh = FindFirstVolumeA(devname, sizeof(devname));
+	char *devnames[100];
+	if(dh != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			len = strlen(devname);
+			totlen += len + 1;
+			devnames[cnt] = malloc(len + 1);
+			strcpy(devnames[cnt], devname);
+			++cnt;
+		}
+		while(FindNextVolumeA(dh, devname, sizeof(devname)));
+	}
+	char **strs = malloc((cnt + 1) * sizeof(char *) + totlen);
+	char *curr = (char *)(strs + cnt + 1);
+	for(int i = 0; i < cnt; ++i)
+	{
+		strs[i] = curr;
+		strcpy(curr, devnames[i]);
+		for(; *curr != '\0'; ++curr);
+		++curr;
+		free(devnames[i]);
+	}
 #else
 	int cnt;
 	char **strs = cpcou____dev_sd_filter(&cnt, 3, 3);
