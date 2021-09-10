@@ -55,8 +55,14 @@ typedef struct cpcou_pipe
 int cpcou_get_partition_space(const char *part, size_t *fr, size_t *tot);
 
 /**
+ * Gets names of storage devices on the computer
+ * This will be sd followed by a letter on linux, or \Device\... on windows
+ */
+char **cpcou_get_devices(void);
+
+/**
  * Gets names of partitions of devices on the computer
- * This will be /dev/sd.. on linux, or drive letters on windows
+ * This will be sd.. on linux, or drive letters on windows
  */
 char **cpcou_get_partitions(void);
 

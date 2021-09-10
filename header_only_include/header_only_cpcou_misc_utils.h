@@ -61,15 +61,66 @@ int cpcou_get_partition_space(const char *part, size_t *fr, size_t *tot)
 #endif
 }
 
+#ifndef _WIN32
+static inline char **cpcou____dev_sd_filter(int *cnt, size_t mini, size_t maxi)
+{
+	int len;
+	size_t totlen = 0;
+	*cnt = 0;
+	DIR *devdir = opendir("/dev");
+	struct dirent *en = readdir(devdir);
+	char *partnames[100];
+	while(en != NULL)
+	{
+		len = strlen(en->d_name);
+		if(len >= mini && len <= maxi && strncmp(en->d_name, "sd", 2) == 0)
+		{
+			partnames[*cnt] = malloc(len + 1);
+			strcpy(partnames[*cnt], en->d_name);
+			++*cnt;
+			totlen += len + 1;
+		}
+		en = readdir(devdir);
+	}
+	closedir(devdir);
+	char **strs = malloc((*cnt + 1) * sizeof(char *) + totlen);
+	char *curr = (char *)(strs + *cnt + 1);
+	for(int i = 0; i < *cnt; ++i)
+	{
+		strs[i] = curr;
+		strcpy(curr, partnames[i]);
+		for(; *curr != '\0'; ++curr);
+		++curr;
+		free(partnames[i]);
+	}
+	return strs;
+}
+#endif
+
+/**
+ * Gets names of storage devices on the computer
+ * This will be sd followed by a letter on linux, or \Device\... on windows
+ */
+char **cpcou_get_devices(void)
+{
+#ifdef _WIN32
+#else
+	int cnt;
+	char **strs = cpcou____dev_sd_filter(&cnt, 3, 3);
+#endif
+	strs[cnt] = NULL;
+	return strs;
+}
+
 /**
  * Gets names of partitions of devices on the computer
- * This will be /dev/sd.. on linux, or drive letters on windows
+ * This will be sd.. on linux, or drive letters on windows
  */
 char **cpcou_get_partitions(void)
 {
+#ifdef _WIN32
 	int len, cnt = 0;
 	size_t totlen = 0;
-#ifdef _WIN32
 	char dletters[100];
 	GetLogicalDriveStringsA(sizeof(dletters), dletters);
 	for(char *it = dletters; *it != '\0';)
@@ -93,32 +144,8 @@ char **cpcou_get_partitions(void)
 		++cnt;
 	}
 #else
-	DIR *devdir = opendir("/dev");
-	struct dirent *en = readdir(devdir);
-	char *partnames[100];
-	while(en != NULL)
-	{
-		len = strlen(en->d_name);
-		if(len > 3 && strncmp(en->d_name, "sd", 2) == 0)
-		{
-			partnames[cnt] = malloc(len + 1);
-			strcpy(partnames[cnt], en->d_name);
-			++cnt;
-			totlen += len + 1;
-		}
-		en = readdir(devdir);
-	}
-	closedir(devdir);
-	char **strs = malloc((cnt + 1) * sizeof(char *) + totlen);
-	char *curr = (char *)(strs + cnt + 1);
-	for(int i = 0; i < cnt; ++i)
-	{
-		strs[i] = curr;
-		strcpy(curr, partnames[i]);
-		for(; *curr != '\0'; ++curr);
-		++curr;
-		free(partnames[i]);
-	}
+	int cnt;
+	char **strs = cpcou____dev_sd_filter(&cnt, 4, 5);
 #endif
 	strs[cnt] = NULL;
 	return strs;
