@@ -5,6 +5,7 @@
 #include<string.h>
 #ifdef _WIN32
 #include<windows.h>
+#include<shlwapi.h>
 #include<ws2tcpip.h>
 #else
 #include<arpa/inet.h>
@@ -28,6 +29,12 @@ const char cpcou____digits[37] = "0123456789abcdefghijklmnopqrstuvwxyz";
 int cpcou_set_in_file(const char *name)
 {
 #ifdef _WIN32
+	SECURITY_ATTRIBUTES attr;
+	attr.nLength = sizeof(attr);
+	attr.lpSecurityDescriptor = NULL;
+	attr.bInheritHandle = FALSE;
+	HANDLE fh = CreateFileA(name, GENERIC_READ, 0, &attr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	return fh != INVALID_HANDLE_VALUE ? cpcou_set_in_pipe(fh) : -1;
 #else
 	int fd = open(name, O_RDONLY);
 	int succ = fd == -1 ? -1 : 0;
@@ -44,6 +51,12 @@ int cpcou_set_in_file(const char *name)
 int cpcou_set_out_file(const char *name, int append)
 {
 #ifdef _WIN32
+	SECURITY_ATTRIBUTES attr;
+	attr.nLength = sizeof(attr);
+	attr.lpSecurityDescriptor = NULL;
+	attr.bInheritHandle = FALSE;
+	HANDLE fh = CreateFileA(name, append ? FILE_APPEND_DATA : GENERIC_WRITE, 0, &attr, PathFileExistsA(name) ? OPEN_EXISTING : CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+	return fh != INVALID_HANDLE_VALUE ? cpcou_set_out_pipe(fh) : -1;
 #else
 	int fd = open(name, O_APPEND * append | O_CREAT | O_WRONLY, S_IRWXU);
 	int succ = fd == -1 ? -1 : 0;
@@ -60,6 +73,12 @@ int cpcou_set_out_file(const char *name, int append)
 int cpcou_set_err_file(const char *name, int append)
 {
 #ifdef _WIN32
+	SECURITY_ATTRIBUTES attr;
+	attr.nLength = sizeof(attr);
+	attr.lpSecurityDescriptor = NULL;
+	attr.bInheritHandle = FALSE;
+	HANDLE fh = CreateFileA(name, append ? FILE_APPEND_DATA : GENERIC_WRITE, 0, &attr, PathFileExistsA(name) ? OPEN_EXISTING : CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+	return fh != INVALID_HANDLE_VALUE ? cpcou_set_err_pipe(fh) : -1;
 #else
 	int fd = open(name, O_APPEND * append | O_CREAT | O_WRONLY, S_IRWXU);
 	int succ = fd == -1 ? -1 : 0;
@@ -75,6 +94,7 @@ int cpcou_set_err_file(const char *name, int append)
 int cpcou_set_in_pipe(cpcou_pipe_t pipe)
 {
 #ifdef _WIN32
+	return SetStdHandle(STD_INPUT_HANDLE, pipe) ? 0 : -1;
 #else
 	return dup2(pipe, STDIN_FILENO) == -1 ? -1 : 0;
 #endif
@@ -86,6 +106,7 @@ int cpcou_set_in_pipe(cpcou_pipe_t pipe)
 int cpcou_set_out_pipe(cpcou_pipe_t pipe)
 {
 #ifdef _WIN32
+	return SetStdHandle(STD_OUTPUT_HANDLE, pipe) ? 0 : -1;
 #else
 	return dup2(pipe, STDOUT_FILENO) == -1 ? -1 : 0;
 #endif
@@ -97,6 +118,7 @@ int cpcou_set_out_pipe(cpcou_pipe_t pipe)
 int cpcou_set_err_pipe(cpcou_pipe_t pipe)
 {
 #ifdef _WIN32
+	return SetStdHandle(STD_ERROR_HANDLE, pipe) ? 0 : -1;
 #else
 	return dup2(pipe, STDERR_FILENO) == -1 ? -1 : 0;
 #endif
