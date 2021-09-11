@@ -23,6 +23,86 @@ extern char **environ;
 const char cpcou____digits[37] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 /**
+ * Set the standard input to a file, this file must exist
+ */
+int cpcou_set_in_file(const char *name)
+{
+#ifdef _WIN32
+#else
+	int fd = open(name, O_RDONLY);
+	int succ = fd == -1 ? -1 : 0;
+	if(succ == 0)
+		succ = dup2(fd, STDIN_FILENO) == -1 ? -1 : 0;
+	return succ;
+#endif
+}
+
+/**
+ * Set the standard output to a file, this file will be created if it does not exist
+ * If append is true, then data will be written to the end of the file
+ */
+int cpcou_set_out_file(const char *name, int append)
+{
+#ifdef _WIN32
+#else
+	int fd = open(name, O_APPEND * append | O_CREAT | O_WRONLY, S_IRWXU);
+	int succ = fd == -1 ? -1 : 0;
+	if(succ == 0)
+		succ = dup2(fd, STDOUT_FILENO) == -1 ? -1 : 0;
+	return succ;
+#endif
+}
+
+/**
+ * Set the standard error to a file, this file will be created if it does not exist
+ * If append is true, then data will be written to the end of the file
+ */
+int cpcou_set_err_file(const char *name, int append)
+{
+#ifdef _WIN32
+#else
+	int fd = open(name, O_APPEND * append | O_CREAT | O_WRONLY, S_IRWXU);
+	int succ = fd == -1 ? -1 : 0;
+	if(succ == 0)
+		succ = dup2(fd, STDERR_FILENO) == -1 ? -1 : 0;
+	return succ;
+#endif
+}
+
+/**
+ * Set the standard input to a pipe
+ */
+int cpcou_set_in_pipe(cpcou_pipe_t pipe)
+{
+#ifdef _WIN32
+#else
+	return dup2(pipe, STDIN_FILENO) == -1 ? -1 : 0;
+#endif
+}
+
+/**
+ * Set the standard output to a pipe
+ */
+int cpcou_set_out_pipe(cpcou_pipe_t pipe)
+{
+#ifdef _WIN32
+#else
+	return dup2(pipe, STDOUT_FILENO) == -1 ? -1 : 0;
+#endif
+}
+
+/**
+ * Set the standard error to a pipe
+ */
+int cpcou_set_err_pipe(cpcou_pipe_t pipe)
+{
+#ifdef _WIN32
+#else
+	return dup2(pipe, STDERR_FILENO) == -1 ? -1 : 0;
+#endif
+}
+
+/**
  * Gets the partition size and free space, returns zero on success
  * For windows, part should be a drive letter followed by :\
  * For linux, part should be sd followed by a letter, then a number, the /dev/ is implicit

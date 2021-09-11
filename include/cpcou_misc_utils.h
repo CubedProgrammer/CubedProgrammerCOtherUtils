@@ -48,6 +48,38 @@ typedef struct cpcou_pipe
 #endif
 
 /**
+ * Set the standard input to a file, this file must exist
+ */
+int cpcou_set_in_file(const char *name);
+
+/**
+ * Set the standard output to a file, this file will be created if it does not exist
+ * If append is true, then data will be written to the end of the file
+ */
+int cpcou_set_out_file(const char *name, int append);
+
+/**
+ * Set the standard error to a file, this file will be created if it does not exist
+ * If append is true, then data will be written to the end of the file
+ */
+int cpcou_set_err_file(const char *name, int append);
+
+/**
+ * Set the standard input to a pipe
+ */
+int cpcou_set_in_pipe(cpcou_pipe_t pipe);
+
+/**
+ * Set the standard output to a pipe
+ */
+int cpcou_set_out_pipe(cpcou_pipe_t pipe);
+
+/**
+ * Set the standard error to a pipe
+ */
+int cpcou_set_err_pipe(cpcou_pipe_t pipe);
+
+/**
  * Gets the partition size and free space, returns zero on success
  * For windows, part should be a drive letter followed by :\
  * For linux, part should be sd followed by a letter, then a number, the /dev/ is implicit
