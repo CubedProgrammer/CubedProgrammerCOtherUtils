@@ -39,7 +39,7 @@ int cpcou_set_in_file(const char *name)
 	int fd = open(name, O_RDONLY);
 	int succ = fd == -1 ? -1 : 0;
 	if(succ == 0)
-		succ = dup2(fd, STDIN_FILENO) == -1 ? -1 : 0;
+		succ = cpcou_set_in_pipe(fd);
 	return succ;
 #endif
 }
@@ -61,7 +61,7 @@ int cpcou_set_out_file(const char *name, int append)
 	int fd = open(name, O_APPEND * append | O_CREAT | O_WRONLY, S_IRWXU);
 	int succ = fd == -1 ? -1 : 0;
 	if(succ == 0)
-		succ = dup2(fd, STDOUT_FILENO) == -1 ? -1 : 0;
+		succ = cpcou_set_out_pipe(fd);
 	return succ;
 #endif
 }
@@ -83,7 +83,7 @@ int cpcou_set_err_file(const char *name, int append)
 	int fd = open(name, O_APPEND * append | O_CREAT | O_WRONLY, S_IRWXU);
 	int succ = fd == -1 ? -1 : 0;
 	if(succ == 0)
-		succ = dup2(fd, STDERR_FILENO) == -1 ? -1 : 0;
+		succ = cpcou_set_err_pipe(fd);
 	return succ;
 #endif
 }
