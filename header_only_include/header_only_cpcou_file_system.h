@@ -7,6 +7,7 @@
 #include<utime.h>
 #elif defined _WIN32
 #include<windows.h>
+#include<shlwapi.h>
 #include<sys/utime.h>
 #endif
 #include<stdio.h>
@@ -117,7 +118,11 @@ char **cpcou_folder_insides(const char *name)
  */
 int cpcou_move_file(const char *old, const char *new)
 {
+#ifdef _WIN32
+	if(PathFileExistsA(new))
+#else
 	if(access(new, F_OK) == 0)
+#endif
 		cpcou_delete_file(new);
 #ifdef __linux__
 	return rename(old, new);
