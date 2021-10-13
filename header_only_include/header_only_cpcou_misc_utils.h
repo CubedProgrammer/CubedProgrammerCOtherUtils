@@ -13,6 +13,7 @@
 #include<fcntl.h>
 #include<netdb.h>
 #include<sys/statvfs.h>
+#include<termios.h>
 #include<unistd.h>
 #endif
 #include<cpcou_misc_utils.h>
@@ -22,6 +23,171 @@ extern char **environ;
 #endif
 
 const char cpcou____digits[37] = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+#ifdef _WIN32
+#define cpcou____getch _getch
+#else
+#define cpcou____getch getchar
+#endif
+
+/**
+ * Gets a password from stdin
+ * Maximum password length is sz - 1
+ * if toggle is 1, then Ctrl+A shows or hides password, if toggle is 2, then Ctrl+B, 3, Ctrl+C, and so on
+ * Use zero to disable this feature
+ */
+void cpcou_get_password(char *restrict buf, size_t sz, int toggle)
+{
+#ifndef _WIN32
+	struct termios old;
+	tcgetattr(STDIN_FILENO, &old);
+	old.c_lflag &= ~ECHO;
+	old.c_lflag &= ~ICANON;
+	tcsetattr(STDIN_FILENO, TCSANOW, &old);
+#endif
+	char c = cpcou____getch();
+	size_t pos = 0, cnt = 0;
+	int sh = 0;
+#ifdef _WIN32
+	while(c != '\r')
+#else
+	while(c != '\n')
+#endif
+	{
+		if(toggle && c == toggle)
+		{
+			for(size_t i = 0; i < cnt; ++i)
+				fputc('\b', stdout);
+			if(sh)
+			{
+				for(size_t i = 0; i < cnt; ++i)
+					fputc('*', stdout);
+			}
+			else
+				fwrite(buf, 1, cnt, stdout);
+			sh = !sh;
+		}
+		else if(c == 033)
+		{
+			c = cpcou____getch();
+			if(c == 0133)
+			{
+				c = cpcou____getch();
+				switch(c)
+				{
+					case 0104:
+						if(pos > 0)
+						{
+							--pos;
+							fputc('\b', stdout);
+						}
+						break;
+					case 0103:
+						if(pos < cnt)
+						{
+							fputc(sh ? buf[pos] : '*', stdout);
+							++pos;
+						}
+						break;
+					case 0110:
+						for(size_t i = 0; i < pos; ++i)
+							fputc('\b', stdout);
+						pos = 0;
+						break;
+					case 0106:
+						if(sh)
+							fwrite(buf + pos, 1, cnt - pos, stdout);
+						else
+						{
+							for(size_t i = pos; i < cnt; ++i)
+								fputc('*', stdout);
+						}
+						pos = cnt;
+						break;
+					case 063:
+						if(pos != cnt)
+						{
+							if(pos + 1 != cnt)
+								memmove(buf + pos, buf + pos + 1, cnt - pos - 1);
+							--cnt;
+							if(sh)
+								fwrite(buf + pos, 1, cnt - pos, stdout);
+							else
+							{
+								for(size_t i = pos; i < cnt; ++i)
+									fputc('*', stdout);
+							}
+							fputc(' ', stdout);
+							for(size_t i = pos; i <= cnt; ++i)
+								fputc('\b', stdout);
+						}
+						cpcou____getch();
+						break;
+				}
+			}
+		}
+		else
+#ifdef _WIN32
+			if(c == '\b')
+#else
+			if(c == 0177)
+#endif
+			{
+				if(pos != 0)
+				{
+					if(pos != cnt)
+						memmove(buf + pos - 1, buf + pos, cnt - pos);
+					--cnt;
+					--pos;
+					fputc('\b', stdout);
+					if(sh)
+						fwrite(buf + pos, 1, cnt - pos, stdout);
+					else
+					{
+						for(size_t i = pos; i < cnt; ++i)
+							fputc('*', stdout);
+					}
+					fputc(' ', stdout);
+					for(size_t i = pos; i <= cnt; ++i)
+						fputc('\b', stdout);
+				}
+			}
+			else
+			{
+				if(pos != cnt)
+					memmove(buf + pos + 1, buf + pos, cnt - pos);
+				buf[pos] = c;
+				++cnt;
+				if(sh)
+					fwrite(buf + pos, 1, cnt - pos, stdout);
+				else
+				{
+					for(size_t i = pos; i < cnt; ++i)
+						fputc('*', stdout);
+				}
+				++pos;
+				for(size_t i = pos; i < cnt; ++i)
+					fputc('\b', stdout);
+			}
+		fflush(stdout);
+		c = cpcou____getch();
+	}
+	buf[cnt] = '\0';
+	if(sh)
+		fwrite(buf + pos, 1, cnt - pos, stdout);
+	else
+	{
+		for(size_t i = pos; i < cnt; ++i)
+			fputc('*', stdout);
+	}
+#ifndef _WIN32
+	old.c_lflag |= ECHO | ICANON;
+	tcsetattr(STDIN_FILENO, TCSANOW, &old);
+#endif
+	cpcou_stdout_erase(cnt);
+	fputc('\n', stdout);
+	fflush(stdout);
+}
 
 /**
  * Set the standard input to a file, this file must exist

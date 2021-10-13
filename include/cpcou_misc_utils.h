@@ -48,6 +48,14 @@ typedef struct cpcou_pipe
 #endif
 
 /**
+ * Gets a password from stdin
+ * Maximum password length is sz - 1
+ * if toggle is 1, then Ctrl+A shows or hides password, if toggle is 2, then Ctrl+B, 3, Ctrl+C, and so on
+ * Use zero to disable this feature
+ */
+void cpcou_get_password(char *restrict buf, size_t sz, int toggle);
+
+/**
  * Set the standard input to a file, this file must exist
  */
 int cpcou_set_in_file(const char *name);
