@@ -56,7 +56,7 @@ void cpcou_get_password(char *restrict buf, size_t sz, int toggle)
 	{
 		if(toggle && c == toggle)
 		{
-			for(size_t i = 0; i < cnt; ++i)
+			for(size_t i = 0; i < pos; ++i)
 				fputc('\b', stdout);
 			if(sh)
 			{
