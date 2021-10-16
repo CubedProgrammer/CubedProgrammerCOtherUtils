@@ -4,9 +4,9 @@
 #include<stdio.h>
 #include<string.h>
 #ifdef _WIN32
-#include<windows.h>
-#include<shlwapi.h>
+//#include<shlwapi.h>
 #include<ws2tcpip.h>
+#include<windows.h>
 #else
 #include<arpa/inet.h>
 #include<dirent.h>
@@ -65,36 +65,60 @@ void cpcou_get_password(char *restrict buf, size_t sz, int toggle)
 			}
 			else
 				fwrite(buf, 1, cnt, stdout);
+			for(size_t i = pos; i < cnt; ++i)
+				fputc('\b', stdout);
 			sh = !sh;
 		}
+#ifdef _WIN32
+		else if(c == -040)
+#else
 		else if(c == 033)
+#endif
 		{
+#ifndef _WIN32
 			c = cpcou____getch();
 			if(c == 0133)
+#endif
 			{
 				c = cpcou____getch();
 				switch(c)
 				{
+#ifdef _WIN32
+					case 0113:
+#else
 					case 0104:
+#endif
 						if(pos > 0)
 						{
 							--pos;
 							fputc('\b', stdout);
 						}
 						break;
+#ifdef _WIN32
+					case 0115:
+#else
 					case 0103:
+#endif
 						if(pos < cnt)
 						{
 							fputc(sh ? buf[pos] : '*', stdout);
 							++pos;
 						}
 						break;
+#ifdef _WIN32
+					case 0107:
+#else
 					case 0110:
+#endif
 						for(size_t i = 0; i < pos; ++i)
 							fputc('\b', stdout);
 						pos = 0;
 						break;
+#ifdef _WIN32
+					case 0117:
+#else
 					case 0106:
+#endif
 						if(sh)
 							fwrite(buf + pos, 1, cnt - pos, stdout);
 						else
@@ -104,7 +128,11 @@ void cpcou_get_password(char *restrict buf, size_t sz, int toggle)
 						}
 						pos = cnt;
 						break;
+#ifdef _WIN32
+					case 0123:
+#else
 					case 063:
+#endif
 						if(pos != cnt)
 						{
 							if(pos + 1 != cnt)
@@ -121,7 +149,9 @@ void cpcou_get_password(char *restrict buf, size_t sz, int toggle)
 							for(size_t i = pos; i <= cnt; ++i)
 								fputc('\b', stdout);
 						}
+#ifndef _WIN32
 						cpcou____getch();
+#endif
 						break;
 				}
 			}
