@@ -1,6 +1,7 @@
 #ifndef __cplusplus
 #ifndef Included_header_only_cpcou_misc_utils_h
 #define Included_header_only_cpcou_misc_utils_h
+#include<math.h>
 #include<stdio.h>
 #include<string.h>
 #ifdef _WIN32
@@ -474,6 +475,62 @@ char **cpcou_get_partitions(void)
 #endif
 	strs[cnt] = NULL;
 	return strs;
+}
+
+/**
+ * Converts double to a string
+ */
+size_t cpcou_ftoa(double num, char *restrict str)
+{
+	size_t ind = 0;
+	if(num < 0)
+	{
+		str[0] = '-';
+		++ind;
+		num = -num;
+	}
+	if(isnan(num))
+	{
+		strcpy(str + ind, "nan");
+		ind += 3;
+	}
+	else if(isinf(num))
+	{
+		strcpy(str + ind, "inf");
+		ind += 3;
+	}
+	else
+	{
+		int exp=0;
+		if(num < 0.000000000001)
+		{
+			while(num < 1)
+				num *= 10, --exp;
+		}
+		else if(num >= 1000000000000)
+		{
+			while(num >= 10)
+				num *= 0.1, ++exp;
+		}
+		long long ipart = floor(num);
+		double r = num - floor(num);
+		ind += cpcou_lltoa(ipart, str + ind, 10);
+		str[ind++] = '.';
+		r *= 10;
+		while(r != floor(r))
+		{
+			if(r<0)
+				str[ind++] = '0';
+			r*=10;
+		}
+		ind += cpcou_lltoa(r, str + ind, 10);
+		if(exp != 0)
+		{
+			str[ind++] = 'e';
+			ind += cpcou_lltoa(exp, str + ind, 10);
+		}
+	}
+	return ind;
 }
 
 /**

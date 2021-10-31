@@ -107,6 +107,11 @@ char **cpcou_get_devices(void);
 char **cpcou_get_partitions(void);
 
 /**
+ * Converts double to a string
+ */
+size_t cpcou_ftoa(double num, char *restrict str);
+
+/**
  * Converts long long unsigned int to a string
  * Base must be between 2 and 36, inclusive
  */
