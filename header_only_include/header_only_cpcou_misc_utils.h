@@ -372,7 +372,7 @@ static inline char **cpcou____dev_sd_filter(int *cnt, size_t mini, size_t maxi)
 	while(en != NULL)
 	{
 		len = strlen(en->d_name);
-		if(len >= mini && len <= maxi && strncmp(en->d_name, "sd", 2) == 0)
+		if(en->d_type == DT_BLK && len >= mini && len <= maxi && strncmp(en->d_name, "loop", 4) != 0)
 		{
 			partnames[*cnt] = malloc(len + 1);
 			strcpy(partnames[*cnt], en->d_name);
@@ -432,7 +432,7 @@ char **cpcou_get_devices(void)
 	}
 #else
 	int cnt;
-	char **strs = cpcou____dev_sd_filter(&cnt, 3, 3);
+	char **strs = cpcou____dev_sd_filter(&cnt, 3, 10);
 #endif
 	strs[cnt] = NULL;
 	return strs;
@@ -471,7 +471,7 @@ char **cpcou_get_partitions(void)
 	}
 #else
 	int cnt;
-	char **strs = cpcou____dev_sd_filter(&cnt, 4, 5);
+	char **strs = cpcou____dev_sd_filter(&cnt, 4, 10);
 #endif
 	strs[cnt] = NULL;
 	return strs;
