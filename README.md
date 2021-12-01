@@ -13,4 +13,6 @@ gcc -Iinclude -Iheader_only_include -O3 -c src/cpcou_process_streams.c -fPIC
 
 gcc -Iinclude -Iheader_only_include -O3 -c src/cpcou_str_algo.c -fPIC
 
-gcc -shared -o libcpcou cpcou_file_system.o cpcou_misc_utils.o cpcou_process_basic.o cpcou_process_streams.o cpcou_str_algo.o
+gcc -Iinclude -Iheader_only_include -O3 -c src/cpcou_text_formatting.c -fPIC
+
+gcc -shared -o libcpcou cpcou_file_system.o cpcou_misc_utils.o cpcou_process_basic.o cpcou_process_streams.o cpcou_str_algo.o cpcou_text_formatting.o

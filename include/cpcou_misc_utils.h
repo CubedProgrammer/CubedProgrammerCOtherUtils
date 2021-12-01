@@ -52,8 +52,9 @@ typedef struct cpcou_pipe
  * Maximum password length is sz - 1
  * if toggle is 1, then Ctrl+A shows or hides password, if toggle is 2, then Ctrl+B, 3, Ctrl+C, and so on
  * Use zero to disable this feature
+ * If sh is zero, then the password is hidden by default, and one for shown
  */
-void cpcou_get_password(char *restrict buf, size_t sz, int toggle);
+void cpcou_get_password(char *restrict buf, size_t sz, int toggle, int sh);
 
 /**
  * Set the standard input to a file, this file must exist

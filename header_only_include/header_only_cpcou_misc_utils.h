@@ -36,8 +36,9 @@ const char cpcou____digits[37] = "0123456789abcdefghijklmnopqrstuvwxyz";
  * Maximum password length is sz - 1
  * if toggle is 1, then Ctrl+A shows or hides password, if toggle is 2, then Ctrl+B, 3, Ctrl+C, and so on
  * Use zero to disable this feature
+ * If sh is zero, then the password is hidden by default, and one for shown
  */
-void cpcou_get_password(char *restrict buf, size_t sz, int toggle)
+void cpcou_get_password(char *restrict buf, size_t sz, int toggle, int sh)
 {
 #ifndef _WIN32
 	struct termios old;
@@ -48,7 +49,6 @@ void cpcou_get_password(char *restrict buf, size_t sz, int toggle)
 #endif
 	char c = cpcou____getch();
 	size_t pos = 0, cnt = 0;
-	int sh = 0;
 #ifdef _WIN32
 	while(c != '\r')
 #else
@@ -183,7 +183,7 @@ void cpcou_get_password(char *restrict buf, size_t sz, int toggle)
 						fputc('\b', stdout);
 				}
 			}
-			else
+			else if(cnt < sz)
 			{
 				if(pos != cnt)
 					memmove(buf + pos + 1, buf + pos, cnt - pos);
@@ -216,7 +216,6 @@ void cpcou_get_password(char *restrict buf, size_t sz, int toggle)
 	tcsetattr(STDIN_FILENO, TCSANOW, &old);
 #endif
 	cpcou_stdout_erase(cnt);
-	fputc('\n', stdout);
 	fflush(stdout);
 }
 
