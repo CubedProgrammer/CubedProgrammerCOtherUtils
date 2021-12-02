@@ -32,8 +32,237 @@ const char cpcou____digits[37] = "0123456789abcdefghijklmnopqrstuvwxyz";
 #endif
 
 /**
+ * Convert a number to or from Roman numerals
+ * If alo is 1, then an overline is allowed to represent multiplication by 1000, and 0 disallows this
+ */
+int cpcou_to_roman_numeral(int n, char *buf, int alo)
+{
+	if(n > 3999 + 3996000 * alo && n <= 0)
+		return-1;
+	else
+	{
+		if(alo)
+		{
+			strcpy(buf, "\033\13353m");
+			buf += 5;
+			for(int i = n / 1000000; i > 0; --i, *buf = 'M', ++buf);
+			n %= 1000000;
+			if(n >= 900000)
+			{
+				buf[0] = 'C';
+				buf[1] = 'M';
+				buf += 2;
+				n -= 900000;
+			}
+			else if(n >= 500000)
+			{
+				n -= 500000;
+				*buf = 'D';
+				++buf;
+			}
+			else if(n >= 400000)
+			{
+				buf[0] = 'C';
+				buf[1] = 'D';
+				buf += 2;
+				n -= 400000;
+			}
+			for(int i = n / 100000; i > 0; --i, *buf = 'C', ++buf);
+			n %= 100000;
+			if(n >= 90000)
+			{
+				buf[0] = 'X';
+				buf[1] = 'C';
+				buf += 2;
+				n -= 90000;
+			}
+			else if(n >= 50000)
+			{
+				n -= 50000;
+				*buf = 'L';
+				++buf;
+			}
+			else if(n >= 40000)
+			{
+				buf[0] = 'X';
+				buf[1] = 'L';
+				buf += 2;
+				n -= 40000;
+			}
+			for(int i = n / 10000; i > 0; --i, *buf = 'X', ++buf);
+			n %= 10000;
+			if(n >= 9000)
+			{
+				strcpy(buf, "\033\1330mM\033\13353mX");
+				buf += 11;
+				n -= 9000;
+			}
+			else if(n >= 5000)
+			{
+				n -= 5000;
+				*buf = 'V';
+				++buf;
+			}
+			else if(n >= 4000)
+			{
+				strcpy(buf, "\033\1330mM\033\13353mV");
+				buf += 11;
+				n -= 4000;
+			}
+			strcpy(buf, "\033\1330m");
+			buf += 4;
+		}
+		for(int i = n / 1000; i > 0; --i, *buf = 'M', ++buf);
+		n %= 1000;
+		if(n >= 900)
+		{
+			buf[0] = 'C';
+			buf[1] = 'M';
+			buf += 2;
+			n -= 90;
+		}
+		else if(n >= 500)
+		{
+			n -= 500;
+			*buf = 'D';
+			++buf;
+		}
+		else if(n >= 400)
+		{
+			buf[0] = 'C';
+			buf[1] = 'D';
+			buf += 2;
+			n -= 400;
+		}
+		for(int i = n / 100; i > 0; --i, *buf = 'C', ++buf);
+		n %= 100;
+		if(n >= 90)
+		{
+			buf[0] = 'X';
+			buf[1] = 'C';
+			buf += 2;
+			n -= 90;
+		}
+		else if(n >= 50)
+		{
+			n -= 50;
+			*buf = 'L';
+			++buf;
+		}
+		else if(n >= 40)
+		{
+			buf[0] = 'X';
+			buf[1] = 'L';
+			buf += 2;
+			n -= 40;
+		}
+		for(int i = n / 10; i > 0; --i, *buf = 'X', ++buf);
+		n %= 10;
+		if(n == 9)
+		{
+			buf[0] = 'I';
+			buf[1] = 'X';
+			buf += 2;
+			n -= 9;
+		}
+		else if(n >= 5)
+		{
+			n -= 5;
+			*buf = 'V';
+			++buf;
+		}
+		else if(n == 4)
+		{
+			buf[0] = 'I';
+			buf[1] = 'V';
+			buf += 2;
+			n -= 4;
+		}
+		for(int i = n; i > 0; --i, *buf = 'I', ++buf);
+		*buf = '\0';
+		return 0;
+	}
+}
+
+int cpcou_from_roman_numeral(const char *buf, int alo)
+{
+	int n = 0, l = 99999999, curr;
+	int sm = l, mult = 1;
+	const char *end;
+	for(const char *it = buf; n >= 0 && *it != '\0'; ++it)
+	{
+		if(*it == 27)
+		{
+			for(end = ++it; *end != 'm' && *end != '\0'; ++end);
+			if(*end == 'm')
+			{
+				if(*it == 91)
+				{
+					++it;
+					if(end - it == 2 && strncmp(it, "53", 2) == 0)
+						mult = 999 * alo + 1;
+					else if(end - it == 1 && *it == '0')
+						mult = 1;
+				}
+			}
+			else
+				n = -1, --end;
+			it = end;
+		}
+		else
+		{
+			switch(*it)
+			{
+				case'm':
+				case'M':
+					curr = 1000 * mult;
+					break;
+				case'd':
+				case'D':
+					curr = 500 * mult;
+					break;
+				case'c':
+				case'C':
+					curr = 100 * mult;
+					break;
+				case'l':
+				case'L':
+					curr = 50 * mult;
+					break;
+				case'x':
+				case'X':
+					curr = 10 * mult;
+					break;
+				case'v':
+				case'V':
+					curr = 5 * mult;
+					break;
+				case'i':
+				case'I':
+					curr = 1 * mult;
+					break;
+				default:
+					n = -curr - 1;
+			}
+			n += curr;
+			if(sm < curr)
+			{
+				if(l * 5 == curr || l * 10 == curr)
+					n -= 2 * l;
+				else
+					n = -1;
+			}
+			else
+				sm = curr;
+			l = curr;
+		}
+	}
+	return n;
+}
+
+/**
  * Gets a password from stdin
- * Maximum password length is sz - 1
+ * Maximum password length is sz
  * if toggle is 1, then Ctrl+A shows or hides password, if toggle is 2, then Ctrl+B, 3, Ctrl+C, and so on
  * Use zero to disable this feature
  * If sh is zero, then the password is hidden by default, and one for shown
