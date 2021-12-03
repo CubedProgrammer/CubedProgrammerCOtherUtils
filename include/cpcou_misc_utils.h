@@ -50,13 +50,15 @@ typedef struct cpcou_pipe
 /**
  * Convert a number to or from Roman numerals
  * If alo is 1, then an overline is allowed to represent multiplication by 1000, and 0 disallows this
+ * If alo is 1, M is used when converting to, instead of overlined I
+ * Parsing is case insensitive, and allows IIII
  */
 int cpcou_to_roman_numeral(int n, char *buf, int alo);
 int cpcou_from_roman_numeral(const char *buf, int alo);
 
 /**
  * Gets a password from stdin
- * Maximum password length is sz
+ * Maximum password length is sz, but array should have size sz + 1 for null character
  * if toggle is 1, then Ctrl+A shows or hides password, if toggle is 2, then Ctrl+B, 3, Ctrl+C, and so on
  * Use zero to disable this feature
  * If sh is zero, then the password is hidden by default, and one for shown

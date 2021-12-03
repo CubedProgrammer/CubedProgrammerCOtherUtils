@@ -34,6 +34,8 @@ const char cpcou____digits[37] = "0123456789abcdefghijklmnopqrstuvwxyz";
 /**
  * Convert a number to or from Roman numerals
  * If alo is 1, then an overline is allowed to represent multiplication by 1000, and 0 disallows this
+ * If alo is 1, M is used when converting to, instead of overlined I
+ * Parsing is case insensitive, and allows IIII
  */
 int cpcou_to_roman_numeral(int n, char *buf, int alo)
 {
@@ -262,7 +264,7 @@ int cpcou_from_roman_numeral(const char *buf, int alo)
 
 /**
  * Gets a password from stdin
- * Maximum password length is sz
+ * Maximum password length is sz, but array should have size sz + 1 for null character
  * if toggle is 1, then Ctrl+A shows or hides password, if toggle is 2, then Ctrl+B, 3, Ctrl+C, and so on
  * Use zero to disable this feature
  * If sh is zero, then the password is hidden by default, and one for shown
@@ -270,11 +272,12 @@ int cpcou_from_roman_numeral(const char *buf, int alo)
 void cpcou_get_password(char *restrict buf, size_t sz, int toggle, int sh)
 {
 #ifndef _WIN32
-	struct termios old;
+	struct termios old, new;
 	tcgetattr(STDIN_FILENO, &old);
-	old.c_lflag &= ~ECHO;
-	old.c_lflag &= ~ICANON;
-	tcsetattr(STDIN_FILENO, TCSANOW, &old);
+	memcpy(&new, &old, sizeof(struct termios));
+	new.c_lflag &= ~ECHO;
+	new.c_lflag &= ~ICANON;
+	tcsetattr(STDIN_FILENO, TCSANOW, &new);
 #endif
 	char c = cpcou____getch();
 	size_t pos = 0, cnt = 0;
@@ -323,6 +326,8 @@ void cpcou_get_password(char *restrict buf, size_t sz, int toggle, int sh)
 							--pos;
 							fputc('\b', stdout);
 						}
+						else
+							fputc('\a', stdout);
 						break;
 #ifdef _WIN32
 					case 0115:
@@ -334,6 +339,8 @@ void cpcou_get_password(char *restrict buf, size_t sz, int toggle, int sh)
 							fputc(sh ? buf[pos] : '*', stdout);
 							++pos;
 						}
+						else
+							fputc('\a', stdout);
 						break;
 #ifdef _WIN32
 					case 0107:
@@ -379,6 +386,8 @@ void cpcou_get_password(char *restrict buf, size_t sz, int toggle, int sh)
 							for(size_t i = pos; i <= cnt; ++i)
 								fputc('\b', stdout);
 						}
+						else
+							fputc('\a', stdout);
 #ifndef _WIN32
 						cpcou____getch();
 #endif
@@ -411,6 +420,8 @@ void cpcou_get_password(char *restrict buf, size_t sz, int toggle, int sh)
 					for(size_t i = pos; i <= cnt; ++i)
 						fputc('\b', stdout);
 				}
+				else
+					fputc('\a', stdout);
 			}
 			else if(cnt < sz)
 			{
@@ -429,6 +440,8 @@ void cpcou_get_password(char *restrict buf, size_t sz, int toggle, int sh)
 				for(size_t i = pos; i < cnt; ++i)
 					fputc('\b', stdout);
 			}
+			else
+				fputc('\a', stdout);
 		fflush(stdout);
 		c = cpcou____getch();
 	}
@@ -441,7 +454,6 @@ void cpcou_get_password(char *restrict buf, size_t sz, int toggle, int sh)
 			fputc('*', stdout);
 	}
 #ifndef _WIN32
-	old.c_lflag |= ECHO | ICANON;
 	tcsetattr(STDIN_FILENO, TCSANOW, &old);
 #endif
 	cpcou_stdout_erase(cnt);
