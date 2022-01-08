@@ -423,6 +423,8 @@ void cpcou_get_password(char *restrict buf, size_t sz, int toggle, int sh)
 				else
 					fputc('\a', stdout);
 			}
+			else if(c < ' ')
+				fputc('\a', stdout);
 			else if(cnt < sz)
 			{
 				if(pos != cnt)

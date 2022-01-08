@@ -28,8 +28,51 @@ cpcou_text_formatter_type cpcou_fmt_blue_foreground = "\033\13334m";
 cpcou_text_formatter_type cpcou_fmt_magenta_foreground = "\033\13335m";
 cpcou_text_formatter_type cpcou_fmt_cyan_foreground = "\033\13336m";
 cpcou_text_formatter_type cpcou_fmt_white_foreground = "\033\13337m";
+cpcou_text_formatter_type cpcou_terminal_up = "\033\133A";
+cpcou_text_formatter_type cpcou_terminal_up_return = "\033\133F";
 
 char cpcou____fmt_any_colour_str[20];
+char cpcou____terminal_movement_str[20];
+
+/**
+ * Moves the caret a certain direction
+ * For the returns, moves the caret vertically as well as moving it to the far left
+ */
+cpcou_text_formatter_type cpcou_terminal_left_n(size_t n)
+{
+	sprintf(cpcou____terminal_movement_str, "\033\133%zuD", n);
+	return cpcou____terminal_movement_str;
+}
+
+cpcou_text_formatter_type cpcou_terminal_right_n(size_t n)
+{
+	sprintf(cpcou____terminal_movement_str, "\033\133%zuC", n);
+	return cpcou____terminal_movement_str;
+}
+
+cpcou_text_formatter_type cpcou_terminal_up_n(size_t n)
+{
+	sprintf(cpcou____terminal_movement_str, "\033\133%zuA", n);
+	return cpcou____terminal_movement_str;
+}
+
+cpcou_text_formatter_type cpcou_terminal_down_n(size_t n)
+{
+	sprintf(cpcou____terminal_movement_str, "\033\133%zuB", n);
+	return cpcou____terminal_movement_str;
+}
+
+cpcou_text_formatter_type cpcou_terminal_up_return_n(size_t n)
+{
+	sprintf(cpcou____terminal_movement_str, "\033\133%zuF", n);
+	return cpcou____terminal_movement_str;
+}
+
+cpcou_text_formatter_type cpcou_terminal_down_return_n(size_t n)
+{
+	sprintf(cpcou____terminal_movement_str, "\033\133%zuE", n);
+	return cpcou____terminal_movement_str;
+}
 
 /**
  * Get formatter for any colour.

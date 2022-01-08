@@ -31,6 +31,19 @@ extern cpcou_text_formatter_type cpcou_fmt_blue_foreground;
 extern cpcou_text_formatter_type cpcou_fmt_magenta_foreground;
 extern cpcou_text_formatter_type cpcou_fmt_cyan_foreground;
 extern cpcou_text_formatter_type cpcou_fmt_white_foreground;
+extern cpcou_text_formatter_type cpcou_terminal_up;
+extern cpcou_text_formatter_type cpcou_terminal_up_return;
+
+/**
+ * Moves the caret a certain direction
+ * For the returns, moves the caret vertically as well as moving it to the far left
+ */
+cpcou_text_formatter_type cpcou_terminal_left_n(size_t n);
+cpcou_text_formatter_type cpcou_terminal_right_n(size_t n);
+cpcou_text_formatter_type cpcou_terminal_up_n(size_t n);
+cpcou_text_formatter_type cpcou_terminal_down_n(size_t n);
+cpcou_text_formatter_type cpcou_terminal_up_return_n(size_t n);
+cpcou_text_formatter_type cpcou_terminal_down_return_n(size_t n);
 
 /**
  * Get formatter for any colour.
