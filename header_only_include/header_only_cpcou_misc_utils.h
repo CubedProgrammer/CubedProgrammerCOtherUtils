@@ -2,6 +2,7 @@
 #ifndef Included_header_only_cpcou_misc_utils_h
 #define Included_header_only_cpcou_misc_utils_h
 #include<math.h>
+#include<stdint.h>
 #include<stdio.h>
 #include<string.h>
 #ifdef _WIN32
@@ -30,6 +31,136 @@ const char cpcou____digits[37] = "0123456789abcdefghijklmnopqrstuvwxyz";
 #else
 #define cpcou____getch getchar
 #endif
+
+// Debug malloc hash table
+struct cpcou____ma_hmp_en
+{
+	void *ptr;
+	const char *vname;
+	const char *fname;
+	size_t ln;
+};
+
+struct cpcou____ma_hmp
+{
+	size_t capa, oc;
+	size_t cnt;
+	struct cpcou____ma_hmp_en *stuff;
+};
+
+struct cpcou____ma_hmp *cpcou____ma_hmp_dat = NULL;
+
+/**
+ * Debugging malloc and free functions.
+ */
+void *cpcou_debug_malloc_impl(size_t sz, const char *fname, size_t ln)
+{
+	void *ptr = malloc(sz);
+	if(ptr != NULL)
+	{
+		if(cpcou____ma_hmp_dat == NULL)
+		{
+			cpcou____ma_hmp_dat = malloc(sizeof(*cpcou____ma_hmp_dat));
+			if(cpcou____ma_hmp_dat == NULL)
+				fputs("Could not allocate hashtable for debugging.\n", stderr);
+			else
+			{
+				cpcou____ma_hmp_dat->stuff = malloc(89 * sizeof(struct cpcou____ma_hmp_en));
+				cpcou____ma_hmp_dat->capa = 89;
+				cpcou____ma_hmp_dat->oc = 55;
+				cpcou____ma_hmp_dat->cnt = 0;
+				memset(cpcou____ma_hmp_dat->stuff, 0, 89 * sizeof(struct cpcou____ma_hmp_en));
+				atexit(cpcou_check_mem_impl);
+			}
+		}
+		intptr_t pn = (intptr_t)ptr;
+		pn %= cpcou____ma_hmp_dat->capa;
+		while(cpcou____ma_hmp_dat->stuff[pn].ptr != NULL)
+		{
+			++pn;
+			if(pn == cpcou____ma_hmp_dat->capa)
+				pn = 0;
+		}
+		cpcou____ma_hmp_dat->stuff[pn].ptr = ptr;
+		cpcou____ma_hmp_dat->stuff[pn].ln = ln;
+		cpcou____ma_hmp_dat->stuff[pn].fname = fname;
+		cpcou____ma_hmp_dat->stuff[pn].vname = NULL;
+		++cpcou____ma_hmp_dat->cnt;
+		if(cpcou____ma_hmp_dat->capa * 0.6 < cpcou____ma_hmp_dat->cnt)
+		{
+			struct cpcou____ma_hmp_en *ens = malloc((cpcou____ma_hmp_dat->oc + cpcou____ma_hmp_dat->capa) * sizeof(*ens));
+			size_t nc = cpcou____ma_hmp_dat->capa + cpcou____ma_hmp_dat->oc;
+			for(size_t i = 0; i < cpcou____ma_hmp_dat->capa; ++i)
+			{
+				if(cpcou____ma_hmp_dat->stuff[i].ptr != NULL)
+				{
+					pn = (intptr_t)ptr;
+					pn %= nc;
+					while(ens[pn].ptr != NULL)
+					{
+						++pn;
+						if(pn == nc)
+							pn = 0;
+					}
+					memcpy(ens + pn, cpcou____ma_hmp_dat + i, sizeof(*ens));
+				}
+			}
+			free(cpcou____ma_hmp_dat->stuff);
+			cpcou____ma_hmp_dat->stuff = ens;
+			cpcou____ma_hmp_dat->oc = cpcou____ma_hmp_dat->capa;
+			cpcou____ma_hmp_dat->capa = nc;
+		}
+	}
+	return ptr;
+}
+
+void cpcou_debug_free_impl(void *ptr)
+{
+	intptr_t pn = (intptr_t)ptr;
+	pn %= cpcou____ma_hmp_dat->capa;
+	intptr_t ogpn = pn;
+	int nonexistant = 0;
+	while(!nonexistant && cpcou____ma_hmp_dat->stuff[pn].ptr != ptr)
+	{
+		++pn;
+		if(pn == cpcou____ma_hmp_dat->capa)
+			pn = 0;
+		else if(pn == ogpn)
+			nonexistant = 1;
+	}
+	if(nonexistant)
+		fputs("Attempt to free pointer that was not heap allocated or was already freed.\n", stderr);
+	else
+	{
+		cpcou____ma_hmp_dat->stuff[pn].fname = NULL;
+		cpcou____ma_hmp_dat->stuff[pn].vname = NULL;
+		cpcou____ma_hmp_dat->stuff[pn].ptr = NULL;
+		cpcou____ma_hmp_dat->stuff[pn].ln = 0;
+		--cpcou____ma_hmp_dat->cnt;
+		free(ptr);
+	}
+}
+
+void cpcou_check_mem_impl(void)
+{
+	struct cpcou____ma_hmp *map = cpcou____ma_hmp_dat;
+	if(map != NULL && map->cnt != 0)
+	{
+		fprintf(stderr, "There were %zu heap allocated pointers that were never freed.\n", map->cnt);
+		size_t pn;
+		for(size_t i = 0; i < map->capa; ++i)
+		{
+			if(map->stuff[i].ptr != NULL)
+			{
+				pn = (size_t)map->stuff[i].ptr;
+				if(map->stuff[i].vname != NULL)
+					fprintf(stderr, "Pointer %s with address 0x%zx allocated at %s on line %zu was never freed.\n", map->stuff[i].vname, pn, map->stuff[i].fname, map->stuff[i].ln);
+				else
+					fprintf(stderr, "Pointer with address 0x%zx allocated at %s on line %zu was never freed.\n", pn, map->stuff[i].fname, map->stuff[i].ln);
+			}
+		}
+	}
+}
 
 /**
  * Convert a number to or from Roman numerals

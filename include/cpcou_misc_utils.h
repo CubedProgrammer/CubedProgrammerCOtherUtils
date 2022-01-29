@@ -19,6 +19,8 @@
 #define cpcou_raw_fscanf(__stream__, __t__, ...)fscanf(__stream__, #__t__, __VA_ARGS__)
 #define cpcou_zero_var(__v__)memset(&__v__, 0, sizeof(__v__))
 #define cpcou_one_var(__v__)memset(&__v__, -1, sizeof(__v__))
+#define cpcou_debug_malloc(__sz__)cpcou_debug_malloc_impl(__sz__, __FILE__, __LINE__)
+#define cpcou_debug_free(__ptr__)cpcou_debug_free_impl(__ptr__)
 
 typedef short cpcou_si;
 typedef short unsigned cpcou_su;
@@ -46,6 +48,13 @@ typedef struct cpcou_pipe
 	size_t cnt, ind;
 }*cpcou_pipe_t;
 #endif
+
+/**
+ * Debugging malloc and free functions.
+ */
+void *cpcou_debug_malloc_impl(size_t sz, const char *fname, size_t ln);
+void cpcou_debug_free_impl(void *ptr);
+void cpcou_check_mem_impl(void);
 
 /**
  * Convert a number to or from Roman numerals
