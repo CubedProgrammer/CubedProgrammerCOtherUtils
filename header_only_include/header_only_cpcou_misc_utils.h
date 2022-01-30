@@ -50,6 +50,72 @@ struct cpcou____ma_hmp
 
 struct cpcou____ma_hmp *cpcou____ma_hmp_dat = NULL;
 
+void cpcou____db_ins_ptr(void *ptr, const char *vname, const char *fname, size_t ln)
+{
+	intptr_t pn = (intptr_t)ptr;
+	pn %= cpcou____ma_hmp_dat->capa;
+	while(cpcou____ma_hmp_dat->stuff[pn].ptr != NULL)
+	{
+		++pn;
+		if(pn == cpcou____ma_hmp_dat->capa)
+			pn = 0;
+	}
+	cpcou____ma_hmp_dat->stuff[pn].ptr = ptr;
+	cpcou____ma_hmp_dat->stuff[pn].ln = ln;
+	cpcou____ma_hmp_dat->stuff[pn].fname = fname;
+	cpcou____ma_hmp_dat->stuff[pn].vname = vname;
+	++cpcou____ma_hmp_dat->cnt;
+	if(cpcou____ma_hmp_dat->capa * 0.6 < cpcou____ma_hmp_dat->cnt)
+	{
+		struct cpcou____ma_hmp_en *ens = malloc((cpcou____ma_hmp_dat->oc + cpcou____ma_hmp_dat->capa) * sizeof(*ens));
+		size_t nc = cpcou____ma_hmp_dat->capa + cpcou____ma_hmp_dat->oc;
+		for(size_t i = 0; i < cpcou____ma_hmp_dat->capa; ++i)
+		{
+			if(cpcou____ma_hmp_dat->stuff[i].ptr != NULL)
+			{
+				pn = (intptr_t)ptr;
+				pn %= nc;
+				while(ens[pn].ptr != NULL)
+				{
+					++pn;
+					if(pn == nc)
+						pn = 0;
+				}
+				memcpy(ens + pn, cpcou____ma_hmp_dat + i, sizeof(*ens));
+			}
+		}
+		free(cpcou____ma_hmp_dat->stuff);
+		cpcou____ma_hmp_dat->stuff = ens;
+		cpcou____ma_hmp_dat->oc = cpcou____ma_hmp_dat->capa;
+		cpcou____ma_hmp_dat->capa = nc;
+	}
+}
+
+int cpcou____db_del_ptr(void *ptr)
+{
+	intptr_t pn = (intptr_t)ptr;
+	pn %= cpcou____ma_hmp_dat->capa;
+	intptr_t ogpn = pn;
+	int nonexistant = 0;
+	while(!nonexistant && cpcou____ma_hmp_dat->stuff[pn].ptr != ptr)
+	{
+		++pn;
+		if(pn == cpcou____ma_hmp_dat->capa)
+			pn = 0;
+		else if(cpcou____ma_hmp_dat->stuff[pn].ptr == NULL || pn == ogpn)
+			nonexistant = 1;
+	}
+	if(!nonexistant)
+	{
+		cpcou____ma_hmp_dat->stuff[pn].fname = NULL;
+		cpcou____ma_hmp_dat->stuff[pn].vname = NULL;
+		cpcou____ma_hmp_dat->stuff[pn].ptr = NULL;
+		cpcou____ma_hmp_dat->stuff[pn].ln = 0;
+		--cpcou____ma_hmp_dat->cnt;
+	}
+	return nonexistant;
+}
+
 /**
  * Debugging malloc and free functions.
  */
@@ -73,92 +139,56 @@ void *cpcou_debug_malloc_impl(size_t sz, const char *fname, size_t ln)
 				atexit(cpcou_check_mem_impl);
 			}
 		}
-		intptr_t pn = (intptr_t)ptr;
-		pn %= cpcou____ma_hmp_dat->capa;
-		while(cpcou____ma_hmp_dat->stuff[pn].ptr != NULL)
-		{
-			++pn;
-			if(pn == cpcou____ma_hmp_dat->capa)
-				pn = 0;
-		}
-		cpcou____ma_hmp_dat->stuff[pn].ptr = ptr;
-		cpcou____ma_hmp_dat->stuff[pn].ln = ln;
-		cpcou____ma_hmp_dat->stuff[pn].fname = fname;
-		cpcou____ma_hmp_dat->stuff[pn].vname = NULL;
-		++cpcou____ma_hmp_dat->cnt;
-		if(cpcou____ma_hmp_dat->capa * 0.6 < cpcou____ma_hmp_dat->cnt)
-		{
-			struct cpcou____ma_hmp_en *ens = malloc((cpcou____ma_hmp_dat->oc + cpcou____ma_hmp_dat->capa) * sizeof(*ens));
-			size_t nc = cpcou____ma_hmp_dat->capa + cpcou____ma_hmp_dat->oc;
-			for(size_t i = 0; i < cpcou____ma_hmp_dat->capa; ++i)
-			{
-				if(cpcou____ma_hmp_dat->stuff[i].ptr != NULL)
-				{
-					pn = (intptr_t)ptr;
-					pn %= nc;
-					while(ens[pn].ptr != NULL)
-					{
-						++pn;
-						if(pn == nc)
-							pn = 0;
-					}
-					memcpy(ens + pn, cpcou____ma_hmp_dat + i, sizeof(*ens));
-				}
-			}
-			free(cpcou____ma_hmp_dat->stuff);
-			cpcou____ma_hmp_dat->stuff = ens;
-			cpcou____ma_hmp_dat->oc = cpcou____ma_hmp_dat->capa;
-			cpcou____ma_hmp_dat->capa = nc;
-		}
+		cpcou____db_ins_ptr(ptr, NULL, fname, ln);
 	}
 	return ptr;
 }
 
 void cpcou_debug_free_impl(void *ptr)
 {
-	intptr_t pn = (intptr_t)ptr;
-	pn %= cpcou____ma_hmp_dat->capa;
-	intptr_t ogpn = pn;
-	int nonexistant = 0;
-	while(!nonexistant && cpcou____ma_hmp_dat->stuff[pn].ptr != ptr)
-	{
-		++pn;
-		if(pn == cpcou____ma_hmp_dat->capa)
-			pn = 0;
-		else if(pn == ogpn)
-			nonexistant = 1;
-	}
-	if(nonexistant)
+	if(cpcou____db_del_ptr(ptr))
 		fputs("Attempt to free pointer that was not heap allocated or was already freed.\n", stderr);
 	else
-	{
-		cpcou____ma_hmp_dat->stuff[pn].fname = NULL;
-		cpcou____ma_hmp_dat->stuff[pn].vname = NULL;
-		cpcou____ma_hmp_dat->stuff[pn].ptr = NULL;
-		cpcou____ma_hmp_dat->stuff[pn].ln = 0;
-		--cpcou____ma_hmp_dat->cnt;
 		free(ptr);
+}
+
+void *cpcou_debug_realloc_impl(void *ptr, size_t sz, const char *vname, const char *fname, size_t ln)
+{
+	void *new = NULL;
+	if(cpcou____db_del_ptr(ptr))
+		fputs("Attempt to reallocate pointer that was not heap allocated or has already been freed.\n", stderr);
+	else
+	{
+		new = realloc(ptr, sz);
+		if(new != NULL)
+			cpcou____db_ins_ptr(new, vname, fname, ln);
 	}
+	return new;
 }
 
 void cpcou_check_mem_impl(void)
 {
 	struct cpcou____ma_hmp *map = cpcou____ma_hmp_dat;
-	if(map != NULL && map->cnt != 0)
+	if(map != NULL)
 	{
-		fprintf(stderr, "There were %zu heap allocated pointers that were never freed.\n", map->cnt);
-		size_t pn;
-		for(size_t i = 0; i < map->capa; ++i)
+		if(map->cnt != 0)
 		{
-			if(map->stuff[i].ptr != NULL)
+			fprintf(stderr, "There were %zu heap allocated pointers that were never freed.\n", map->cnt);
+			size_t pn;
+			for(size_t i = 0; i < map->capa; ++i)
 			{
-				pn = (size_t)map->stuff[i].ptr;
-				if(map->stuff[i].vname != NULL)
-					fprintf(stderr, "Pointer %s with address 0x%zx allocated at %s on line %zu was never freed.\n", map->stuff[i].vname, pn, map->stuff[i].fname, map->stuff[i].ln);
-				else
-					fprintf(stderr, "Pointer with address 0x%zx allocated at %s on line %zu was never freed.\n", pn, map->stuff[i].fname, map->stuff[i].ln);
+				if(map->stuff[i].ptr != NULL)
+				{
+					pn = (size_t)map->stuff[i].ptr;
+					if(map->stuff[i].vname != NULL)
+						fprintf(stderr, "Pointer %s with address 0x%zx allocated at %s on line %zu was never freed.\n", map->stuff[i].vname, pn, map->stuff[i].fname, map->stuff[i].ln);
+					else
+						fprintf(stderr, "Pointer with address 0x%zx allocated at %s on line %zu was never freed.\n", pn, map->stuff[i].fname, map->stuff[i].ln);
+				}
 			}
 		}
+		free(map->stuff);
+		free(map);
 	}
 }
 
