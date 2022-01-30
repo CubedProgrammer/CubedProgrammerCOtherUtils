@@ -22,6 +22,8 @@
 #define cpcou_debug_malloc(__sz__)cpcou_debug_malloc_impl(__sz__, __FILE__, __LINE__)
 #define cpcou_debug_free(__ptr__)cpcou_debug_free_impl(__ptr__)
 #define cpcou_debug_realloc(__ptr__, __sz__)(__ptr__ = cpcou_debug_realloc_impl(__ptr__, __sz__, #__ptr__, __FILE__, __LINE__))
+#define cpcou_debug_calloc(__cnt__, __sz__)cpcou_debug_calloc_impl((__cnt__) * (__sz__), __FILE__, __LINE__)
+#define cpcou_debug_check_heap cpcou_check_mem_manual()
 
 typedef short cpcou_si;
 typedef short unsigned cpcou_su;
@@ -56,7 +58,15 @@ typedef struct cpcou_pipe
 void *cpcou_debug_malloc_impl(size_t sz, const char *fname, size_t ln);
 void cpcou_debug_free_impl(void *ptr);
 void *cpcou_debug_realloc_impl(void *ptr, size_t sz, const char *vname, const char *fname, size_t ln);
+void cpcou_check_mem_manual(void);
 void cpcou_check_mem_impl(void);
+
+static inline void *cpcou_debug_calloc_impl(size_t sz, const char *fname, size_t ln)
+{
+	void *ptr = cpcou_debug_malloc_impl(sz, fname, ln);
+	memset(ptr, 0, sz);
+	return ptr;
+}
 
 /**
  * Convert a number to or from Roman numerals

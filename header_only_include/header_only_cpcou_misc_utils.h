@@ -96,7 +96,7 @@ int cpcou____db_del_ptr(void *ptr)
 	intptr_t pn = (intptr_t)ptr;
 	pn %= cpcou____ma_hmp_dat->capa;
 	intptr_t ogpn = pn;
-	int nonexistant = 0;
+	int nonexistant = ptr == NULL;
 	while(!nonexistant && cpcou____ma_hmp_dat->stuff[pn].ptr != ptr)
 	{
 		++pn;
@@ -166,7 +166,7 @@ void *cpcou_debug_realloc_impl(void *ptr, size_t sz, const char *vname, const ch
 	return new;
 }
 
-void cpcou_check_mem_impl(void)
+void cpcou_check_mem_manual(void)
 {
 	struct cpcou____ma_hmp *map = cpcou____ma_hmp_dat;
 	if(map != NULL)
@@ -187,6 +187,15 @@ void cpcou_check_mem_impl(void)
 				}
 			}
 		}
+	}
+}
+
+void cpcou_check_mem_impl(void)
+{
+	struct cpcou____ma_hmp *map = cpcou____ma_hmp_dat;
+	if(map != NULL)
+	{
+		cpcou_check_mem_manual();
 		free(map->stuff);
 		free(map);
 	}
