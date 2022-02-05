@@ -53,6 +53,12 @@ typedef struct cpcou_pipe
 #endif
 
 /**
+ * Gets the size of the terminal attached to the process, if there is one
+ * Returns zero on success, and something else on failure
+ */
+int cpcou_get_terminal_size(int *restrict width, int *restrict height);
+
+/**
  * Debugging malloc and free functions.
  */
 void *cpcou_debug_malloc_impl(size_t sz, const char *fname, size_t ln);

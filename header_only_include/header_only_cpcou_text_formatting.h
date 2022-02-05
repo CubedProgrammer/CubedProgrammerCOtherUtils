@@ -1,6 +1,7 @@
 #ifndef __cplusplus
 #ifndef Included_header_only_cpcou_text_formatting_h
 #define Included_header_only_cpcou_text_formatting_h
+#include<cpcou_misc_utils.h>
 #include<cpcou_text_formatting.h>
 
 cpcou_text_formatter_type cpcou_fmt_reset = "\033\1330m";
@@ -72,6 +73,51 @@ cpcou_text_formatter_type cpcou_terminal_down_return_n(size_t n)
 {
 	sprintf(cpcou____terminal_movement_str, "\033\133%zuE", n);
 	return cpcou____terminal_movement_str;
+}
+
+/**
+ * Sets the position of the caret, instead of moving relative to current
+ */
+void cpcou_terminal_set_col(size_t c)
+{
+	printf("\033\133%zuG", c);
+}
+
+void cpcou_terminal_set_pos(size_t c, size_t r)
+{
+	printf("\033\133%zu;%zuH", r, c);
+}
+
+/**
+ * Fills the entire terminal with a character, or clear the terminal
+ */
+void cpcou_terminal_fill(char c)
+{
+	int u, v;
+	cpcou_get_terminal_size(&u, &v);
+	cpcou_terminal_fill_rect(0, 0, u, v, c);
+}
+
+void cpcou_terminal_clear(void)
+{
+	cpcou_terminal_fill(' ');
+}
+
+/**
+ * Fills a rectangular region in the terminal
+ * Parameters x and y are the coordinates of the top left corner
+ */
+void cpcou_terminal_fill_rect(size_t x, size_t y, size_t w, size_t h, char c)
+{
+	cpcou_terminal_set_pos(x, y);
+	for(size_t i = 0; i < h; ++i)
+	{
+		for(size_t i = 0; i < w; ++i)
+			putchar(c);
+		fputs(cpcou_terminal_down_n(1), stdout);
+		fputs(cpcou_terminal_left_n(w), stdout);
+	}
+	cpcou_terminal_set_pos(x, y);
 }
 
 /**

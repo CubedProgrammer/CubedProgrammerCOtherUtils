@@ -14,6 +14,7 @@
 #include<dirent.h>
 #include<fcntl.h>
 #include<netdb.h>
+#include<sys/ioctl.h>
 #include<sys/statvfs.h>
 #include<termios.h>
 #include<unistd.h>
@@ -49,6 +50,27 @@ struct cpcou____ma_hmp
 };
 
 struct cpcou____ma_hmp *cpcou____ma_hmp_dat = NULL;
+
+/**
+ * Gets the size of the terminal attached to the process, if there is one
+ * Returns zero on success, and something else on failure
+ */
+int cpcou_get_terminal_size(int *restrict width, int *restrict height)
+{
+#ifdef _WIN32
+	CONSOLE_SCREEN_BUFFER_INFO ci;
+	HANDLE ho = GetStdHandle(STD_OUTPUT_HANDLE);
+	BOOL succ = !GetConsoleScreenBufferInfo(ho, &ci);
+	*width = ci.srWindow.Right - ci.srWindow.Left + 1;
+	*height = ci.srWindow.Bottom - ci.srWindow.Top + 1;
+#else
+	struct winsize sz;
+	int succ = ioctl(STDIN_FILENO, TIOCGWINSZ, &sz);
+	*width = sz.ws_col;
+	*height = sz.ws_row;
+#endif
+	return succ;
+}
 
 void cpcou____db_ins_ptr(void *ptr, const char *vname, const char *fname, size_t ln)
 {

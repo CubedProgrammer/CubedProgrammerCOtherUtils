@@ -46,6 +46,24 @@ cpcou_text_formatter_type cpcou_terminal_up_return_n(size_t n);
 cpcou_text_formatter_type cpcou_terminal_down_return_n(size_t n);
 
 /**
+ * Sets the position of the caret, instead of moving relative to current
+ */
+void cpcou_terminal_set_col(size_t c);
+void cpcou_terminal_set_pos(size_t c, size_t r);
+
+/**
+ * Fills the entire terminal with a character, or clear the terminal
+ */
+void cpcou_terminal_fill(char c);
+void cpcou_terminal_clear(void);
+
+/**
+ * Fills a rectangular region in the terminal
+ * Parameters x and y are the coordinates of the top left corner
+ */
+void cpcou_terminal_fill_rect(size_t x, size_t y, size_t w, size_t h, char c);
+
+/**
  * Get formatter for any colour.
  * A call to one of these functions will modify the return values of previous calls
  * Therefore, it is wise to use the return value of these functions immediately
