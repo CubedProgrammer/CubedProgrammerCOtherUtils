@@ -72,6 +72,64 @@ int cpcou_get_terminal_size(int *restrict width, int *restrict height)
 	return succ;
 }
 
+/**
+ * Gets the position of the terminal cursor, if it exists
+ * Returns zero on success, and something else on failure
+ */
+int cpcou_get_cursor_pos(int *restrict x, int *restrict y)
+{
+#ifndef _WIN32
+	struct termios n, o;
+	tcgetattr(STDIN_FILENO, &o);
+	memcpy(&n, &o, sizeof(struct termios));
+	n.c_lflag &= ~ECHO;
+	n.c_lflag &= ~ICANON;
+	tcsetattr(STDIN_FILENO, TCSANOW, &n);
+#endif
+	fputs("\033\1336n", stdout);
+	int succ = 0;
+	char c = cpcou____getch();
+	if(c == 27)
+	{
+		c = cpcou____getch();
+		if(c == 91)
+		{
+			int r = 0;
+			for(c = cpcou____getch(); c >= '0' && c <= '9'; c = cpcou____getch())
+			{
+				r *= 10;
+				r += c - '0';
+			}
+			if(c == ';')
+			{
+				int col = 0;
+				for(c = cpcou____getch(); c >= '0' && c <= '9'; c = cpcou____getch())
+				{
+					col *= 10;
+					col += c - '0';
+				}
+				if(c == 'R')
+				{
+					*x = col;
+					*y = r;
+				}
+				else
+					succ = 1;
+			}
+			else
+				succ = 1;
+		}
+		else
+			succ = 1;
+	}
+	else
+		succ = 1;
+#ifndef _WIN32
+	tcsetattr(STDIN_FILENO, TCSANOW, &o);
+#endif
+	return succ;
+}
+
 void cpcou____db_ins_ptr(void *ptr, const char *vname, const char *fname, size_t ln)
 {
 	intptr_t pn = (intptr_t)ptr;

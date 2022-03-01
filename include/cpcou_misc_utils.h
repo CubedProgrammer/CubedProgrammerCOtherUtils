@@ -59,6 +59,12 @@ typedef struct cpcou_pipe
 int cpcou_get_terminal_size(int *restrict width, int *restrict height);
 
 /**
+ * Gets the position of the terminal cursor, if it exists
+ * Returns zero on success, and something else on failure
+ */
+int cpcou_get_cursor_pos(int *restrict x, int *restrict y);
+
+/**
  * Debugging malloc and free functions.
  */
 void *cpcou_debug_malloc_impl(size_t sz, const char *fname, size_t ln);
