@@ -22,7 +22,7 @@
 #define cpcou_debug_malloc(__sz__)cpcou_debug_malloc_impl(__sz__, __FILE__, __LINE__)
 #define cpcou_debug_free(__ptr__)cpcou_debug_free_impl(__ptr__)
 #define cpcou_debug_realloc(__ptr__, __sz__)(__ptr__ = cpcou_debug_realloc_impl(__ptr__, __sz__, #__ptr__, __FILE__, __LINE__))
-#define cpcou_debug_calloc(__cnt__, __sz__)cpcou_debug_calloc_impl((__cnt__) * (__sz__), __FILE__, __LINE__)
+#define cpcou_debug_calloc(__cnt__, __sz__)cpcou_debug_malloc_impl((__cnt__) * (__sz__), __FILE__, __LINE__)
 #define cpcou_debug_check_heap cpcou_check_mem_manual()
 
 typedef short cpcou_si;

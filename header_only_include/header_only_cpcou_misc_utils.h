@@ -6,7 +6,7 @@
 #include<stdio.h>
 #include<string.h>
 #ifdef _WIN32
-//#include<shlwapi.h>
+#include<shlwapi.h>
 #include<ws2tcpip.h>
 #include<windows.h>
 #else
@@ -39,7 +39,7 @@ struct cpcou____ma_hmp_en
 	void *ptr;
 	const char *vname;
 	const char *fname;
-	size_t ln;
+	size_t ln, bc;
 };
 
 struct cpcou____ma_hmp
@@ -130,7 +130,7 @@ int cpcou_get_cursor_pos(int *restrict x, int *restrict y)
 	return succ;
 }
 
-void cpcou____db_ins_ptr(void *ptr, const char *vname, const char *fname, size_t ln)
+void cpcou____db_ins_ptr(void *ptr, const char *vname, const char *fname, size_t ln, size_t bc)
 {
 	intptr_t pn = (intptr_t)ptr;
 	pn %= cpcou____ma_hmp_dat->capa;
@@ -142,6 +142,7 @@ void cpcou____db_ins_ptr(void *ptr, const char *vname, const char *fname, size_t
 	}
 	cpcou____ma_hmp_dat->stuff[pn].ptr = ptr;
 	cpcou____ma_hmp_dat->stuff[pn].ln = ln;
+	cpcou____ma_hmp_dat->stuff[pn].bc = bc;
 	cpcou____ma_hmp_dat->stuff[pn].fname = fname;
 	cpcou____ma_hmp_dat->stuff[pn].vname = vname;
 	++cpcou____ma_hmp_dat->cnt;
@@ -219,7 +220,7 @@ void *cpcou_debug_malloc_impl(size_t sz, const char *fname, size_t ln)
 				atexit(cpcou_check_mem_impl);
 			}
 		}
-		cpcou____db_ins_ptr(ptr, NULL, fname, ln);
+		cpcou____db_ins_ptr(ptr, NULL, fname, ln, sz);
 	}
 	return ptr;
 }
@@ -241,7 +242,7 @@ void *cpcou_debug_realloc_impl(void *ptr, size_t sz, const char *vname, const ch
 	{
 		new = realloc(ptr, sz);
 		if(new != NULL)
-			cpcou____db_ins_ptr(new, vname, fname, ln);
+			cpcou____db_ins_ptr(new, vname, fname, ln, sz);
 	}
 	return new;
 }
@@ -261,9 +262,9 @@ void cpcou_check_mem_manual(void)
 				{
 					pn = (size_t)map->stuff[i].ptr;
 					if(map->stuff[i].vname != NULL)
-						fprintf(stderr, "Pointer %s with address 0x%zx allocated at %s on line %zu was never freed.\n", map->stuff[i].vname, pn, map->stuff[i].fname, map->stuff[i].ln);
+						fprintf(stderr, "Pointer %s pointing to %zu bytes of memory with address 0x%zx allocated at %s on line %zu was never freed.\n", map->stuff[i].vname, map->stuff[i].bc, pn, map->stuff[i].fname, map->stuff[i].ln);
 					else
-						fprintf(stderr, "Pointer with address 0x%zx allocated at %s on line %zu was never freed.\n", pn, map->stuff[i].fname, map->stuff[i].ln);
+						fprintf(stderr, "Pointer pointing to %zu bytes of memory with address 0x%zx allocated at %s on line %zu was never freed.\n", map->stuff[i].bc, pn, map->stuff[i].fname, map->stuff[i].ln);
 				}
 			}
 		}

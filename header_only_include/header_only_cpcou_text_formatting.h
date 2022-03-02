@@ -95,7 +95,7 @@ void cpcou_terminal_fill(char c)
 {
 	int u, v;
 	cpcou_get_terminal_size(&u, &v);
-	cpcou_terminal_fill_rect(0, 0, u, v, c);
+	cpcou_terminal_fill_rect(1, 1, u, v, c);
 }
 
 void cpcou_terminal_clear(void)
@@ -109,6 +109,8 @@ void cpcou_terminal_clear(void)
  */
 void cpcou_terminal_fill_rect(size_t x, size_t y, size_t w, size_t h, char c)
 {
+	int ox, oy;
+	cpcou_get_cursor_pos(&ox, &oy);
 	cpcou_terminal_set_pos(x, y);
 	for(size_t i = 0; i < h; ++i)
 	{
@@ -117,7 +119,7 @@ void cpcou_terminal_fill_rect(size_t x, size_t y, size_t w, size_t h, char c)
 		fputs(cpcou_terminal_down_n(1), stdout);
 		fputs(cpcou_terminal_left_n(w), stdout);
 	}
-	cpcou_terminal_set_pos(x, y);
+	cpcou_terminal_set_pos(ox, oy);
 }
 
 /**
