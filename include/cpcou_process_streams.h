@@ -6,6 +6,11 @@
 #include<cpcou_process_basic.h>
 
 /**
+ * Checks if stream is ready for reading, returns true if so
+ */
+int cpcou____proc_stream_ready(void *src);
+
+/**
  * Reading from process streams
  */
 int cpcou____proc_rd(void *src, char *buf, size_t cnt);

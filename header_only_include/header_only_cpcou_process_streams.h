@@ -4,9 +4,29 @@
 #ifdef _WIN32
 #include<windows.h>
 #else
+#include<sys/select.h>
 #include<unistd.h>
 #endif
 #include<cpcou_process_streams.h>
+
+/**
+ * Checks if stream is ready for reading, returns true if so
+ */
+int cpcou____proc_stream_ready(void *src)
+{
+#ifdef _WIN32
+	return 0;
+#else
+	int *filedesp = src, filedes = *filedesp;
+	fd_set fds, *fdsp = &fds;
+	FD_ZERO(fdsp);
+	FD_SET(filedes, fdsp);
+	struct timeval tv;
+	tv.tv_sec = 0;
+	tv.tv_usec = 0;
+	return select(filedes + 1, fdsp, NULL, NULL, &tv);
+#endif
+}
 
 /**
  * Reading from process streams
@@ -68,7 +88,10 @@ cpcio_istream cpcou_process_stdout(pcpcou_process proc)
 #ifdef _WIN32
 	return cpcio_open_istream(proc->pstdout, cpcou____proc_rd, cpcou____proc_close_stream);
 #else
-	return cpcio_open_istream(&proc->pstdout, cpcou____proc_rd, cpcou____proc_close_stream);
+	cpcio_istream is = cpcio_open_istream(&proc->pstdout, cpcou____proc_rd, cpcou____proc_close_stream);
+	is->ready = cpcou____proc_stream_ready;
+	cpcio_toggle_buf_is(is);
+	return is;
 #endif
 }
 
@@ -80,7 +103,10 @@ cpcio_istream cpcou_process_stderr(pcpcou_process proc)
 #ifdef _WIN32
 	return cpcio_open_istream(proc->pstderr, cpcou____proc_rd, cpcou____proc_close_stream);
 #else
-	return cpcio_open_istream(&proc->pstderr, cpcou____proc_rd, cpcou____proc_close_stream);
+	cpcio_istream is = cpcio_open_istream(&proc->pstderr, cpcou____proc_rd, cpcou____proc_close_stream);
+	is->ready = cpcou____proc_stream_ready;
+	cpcio_toggle_buf_is(is);
+	return is;
 #endif
 }
 
