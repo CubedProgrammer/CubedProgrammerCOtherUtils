@@ -52,6 +52,26 @@ struct cpcou____ma_hmp
 struct cpcou____ma_hmp *cpcou____ma_hmp_dat = NULL;
 
 /**
+ * Gets a character with terminal echo off from stdin
+ * May not work properly if stdin is not attached to a terminal
+ */
+int cpcou_getchar_raw(void)
+{
+#ifdef _WIN32
+	int ch = getch();
+#else
+	struct termios n, o;
+	tcgetattr(STDIN_FILENO, &o);
+	memcpy(&n, &o, sizeof(struct termios));
+	n.c_lflag &= ~(ECHO | ICANON);
+	tcsetattr(STDIN_FILENO, TCSANOW, &n);
+	int ch = getchar();
+	tcsetattr(STDIN_FILENO, TCSANOW, &o);
+#endif
+	return ch;
+}
+
+/**
  * Gets the size of the terminal attached to the process, if there is one
  * Returns zero on success, and something else on failure
  */

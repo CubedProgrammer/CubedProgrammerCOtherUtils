@@ -53,6 +53,11 @@ typedef struct cpcou_pipe
 #endif
 
 /**
+ * Gets a character with terminal echo off from stdin
+ * May not work properly if stdin is not attached to a terminal
+ */
+int cpcou_getchar_raw(void);
+/**
  * Gets the size of the terminal attached to the process, if there is one
  * Returns zero on success, and something else on failure
  */
