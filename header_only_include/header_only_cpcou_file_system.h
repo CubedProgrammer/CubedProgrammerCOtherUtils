@@ -422,20 +422,32 @@ size_t cpcou_file_count(const char *name)
  */
 int cpcou_copy_file(const char *from, const char *to)
 {
-	cpcou_delete_file(to);
 #ifdef _WIN32
 	return CopyFile(from, to, FALSE) ? 0 : 1;
 #else
+	int failed = 0;
 	size_t size = cpcou_file_size(from);
-	char *cbuf = malloc(size);
-	FILE *fhand = fopen(from, "rb");
-	fread(cbuf, sizeof(char), size, fhand);
-	fclose(fhand);
-	fhand = fopen(to, "wb");
-	size_t r = fwrite(cbuf, sizeof(char), size, fhand);
-	fclose(fhand);
-	free(cbuf);
-	return r == size ? 0 : 1;
+	FILE *fin = fopen(from, "rb");
+	if(fin != NULL)
+	{
+		FILE* fout = fopen(to, "wb");
+		if(fout != NULL)
+		{
+			char *cbuf = malloc(size);
+			fread(cbuf, sizeof(char), size, fin);
+			size_t r = fwrite(cbuf, sizeof(char), size, fin);
+			fclose(fout);
+			free(cbuf);
+			failed = r != size;
+			failed *= -1;
+		}
+		else
+			failed = -1;
+		fclose(fin);
+	}
+	else
+		failed = -1;
+	return failed;
 #endif
 }
 
