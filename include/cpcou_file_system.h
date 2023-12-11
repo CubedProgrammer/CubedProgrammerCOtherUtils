@@ -41,7 +41,7 @@ extern const char cpcou_root_dir[];
 char **cpcou_folder_insides(const char *name);
 
 /**
- * Moves a file to a new location, overwriting anything that was previously there.
+ * Moves a file to a new location, replacing the file that was previously there.
  */
 int cpcou_move_file(const char *old, const char *new);
 

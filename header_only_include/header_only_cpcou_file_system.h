@@ -20,9 +20,9 @@
 /**
  * Root directory, it has no parent
  */
-#ifdef __linux__
+#ifndef _WIN32
 const char cpcou_root_dir[]="/";
-#elif defined _WIN32
+#else
 const char cpcou_root_dir[]="C:\\";
 #endif
 
@@ -37,7 +37,7 @@ char **cpcou_folder_insides(const char *name)
 	char **insides;
 	size_t capa = 5, ocapa = 3, lsz = 0;
 	char **intmp = malloc(capa * sizeof(char*));
-#ifdef __linux__
+#ifndef _WIN32
 	DIR *dir = opendir(name);
 	struct dirent *en = readdir(dir);
 	while(en)
@@ -54,7 +54,7 @@ char **cpcou_folder_insides(const char *name)
 		en = readdir(dir);
 	}
 	closedir(dir);
-#elif defined _WIN32
+#else
 	size_t namlen = strlen(name);
 	char *wcsearch = malloc(namlen + 3);
 	strcpy(wcsearch, name);
@@ -114,19 +114,13 @@ char **cpcou_folder_insides(const char *name)
 }
 
 /**
- * Moves a file to a new location, overwriting anything that was previously there.
+ * Moves a file to a new location, replacing the file that was previously there.
  */
 int cpcou_move_file(const char *old, const char *new)
 {
-#ifdef _WIN32
-	if(PathFileExistsA(new))
-#else
-	if(access(new, F_OK) == 0)
-#endif
-		cpcou_delete_file(new);
-#ifdef __linux__
+#ifndef _WIN32
 	return rename(old, new);
-#elif defined _WIN32
+#else
 	return MoveFile(old, new) == 0 ? -1 : 0;
 #endif
 }
@@ -174,9 +168,9 @@ int cpcou_delete_file(const char *file)
 						}
 						stack[ssz] = malloc(currlen + strlen(*it) + 2);
 						strcpy(stack[ssz], curr);
-#ifdef __linux__
+#ifndef _WIN32
 						stack[ssz][currlen] = '/';
-#elif defined _WIN32
+#else
 						stack[ssz][currlen] = '\\';
 #endif
 						strcpy(stack[ssz] + currlen + 1, *it);
