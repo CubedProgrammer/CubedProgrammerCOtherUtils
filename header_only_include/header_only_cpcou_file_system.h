@@ -1,8 +1,10 @@
 #ifndef __cplusplus
 #ifndef Included_header_only_cpcou_file_system_h
 #define Included_header_only_cpcou_file_system_h
-#ifdef __linux__
+#if defined(__unix__) || defined(__APPLE__)
 #include<dirent.h>
+#include<fcntl.h>
+#include<sys/sendfile.h>
 #include<unistd.h>
 #include<utime.h>
 #elif defined _WIN32
@@ -148,7 +150,7 @@ int cpcou_delete_file(const char *file)
 				stuff = cpcou_folder_insides(curr);
 				currlen = strlen(curr);
 				if(*stuff == NULL)
-#ifdef __linux__
+#if defined(__unix__) || defined(__APPLE__)
 					rmdir(curr);
 #elif defined _WIN32
 					RemoveDirectoryA(curr);
@@ -180,7 +182,7 @@ int cpcou_delete_file(const char *file)
 				free(stuff);
 			}
 			else
-#ifdef __linux__
+#if defined(__unix__) || defined(__APPLE__)
 				res += unlink(curr);
 #elif defined _WIN32
 				res += DeleteFileA(curr) == 0 ? -1 : 0;
@@ -204,7 +206,7 @@ int cpcou_delete_file(const char *file)
  */
 time_t cpcou_last_access(const char *name)
 {
-#ifdef __linux__
+#if defined(__unix__) || defined(__APPLE__)
 	struct stat fstats;
 	stat(name, &fstats);
 	// linux kernel 2.6 has been around since 2004, please update to use the newer features
@@ -225,7 +227,7 @@ time_t cpcou_last_access(const char *name)
  */
 time_t cpcou_last_modify(const char *name)
 {
-#ifdef __linux__
+#if defined(__unix__) || defined(__APPLE__)
 	struct stat fstats;
 	stat(name, &fstats);
 	// linux kernel 2.6 has been around since 2004, please update to use the newer features
@@ -247,7 +249,7 @@ time_t cpcou_last_modify(const char *name)
  */
 time_t cpcou_last_stchange(const char *name)
 {
-#ifdef __linux__
+#if defined(__unix__) || defined(__APPLE__)
 	struct stat fstats;
 	stat(name, &fstats);
 	// linux kernel 2.6 has been around since 2004, please update to use the newer features
@@ -350,9 +352,9 @@ size_t cpcou_folder_size(const char *name)
 				}
 				stack[ssz] = malloc(currlen + strlen(*it) + 2);
 				strcpy(stack[ssz], curr);
-#ifdef __linux__
+#ifndef _WIN32
 				stack[ssz][currlen] = '/';
-#elif defined _WIN32
+#else
 				stack[ssz][currlen] = '\\';
 #endif
 				strcpy(stack[ssz] + currlen + 1, *it);
@@ -399,9 +401,9 @@ size_t cpcou_file_count(const char *name)
 				}
 				stack[ssz] = malloc(currlen + strlen(*it) + 2);
 				strcpy(stack[ssz], curr);
-#ifdef __linux__
+#ifndef _WIN32
 				stack[ssz][currlen] = '/';
-#elif defined _WIN32
+#else
 				stack[ssz][currlen] = '\\';
 #endif
 				strcpy(stack[ssz] + currlen + 1, *it);
@@ -427,24 +429,50 @@ int cpcou_copy_file(const char *from, const char *to)
 #else
 	int failed = 0;
 	size_t bufsz = 1048576;
+#if defined(__unix__) || defined(__APPLE__)
+	int in = open(from, O_RDONLY);
+	if(in != -1)
+#else
 	FILE *fin = fopen(from, "rb");
 	if(fin != NULL)
+#endif
 	{
+#if defined(__unix__) || defined(__APPLE__)
+		int out = open(to, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		if(out != -1)
+#else
 		FILE* fout = fopen(to, "wb");
 		if(fout != NULL)
+#endif
 		{
+#if defined(__unix__) || defined(__APPLE__)
+			ssize_t br = 1, r;
+#else
 			void *cbuf = malloc(bufsz);
 			size_t br = 1, r;
+#endif
 			for(r = 0; br > 0; r += br)
+#if defined(__unix__) || defined(__APPLE__)
+				br = sendfile(out, in, NULL, bufsz);
+#else
 				fwrite(cbuf, sizeof(char), br = fread(cbuf, sizeof(char), bufsz, fin), fin);
 			failed = ferror(fin) || ferror(fout);
 			failed *= -1;
 			fclose(fout);
 			free(cbuf);
+#endif
+#if defined(__unix__) || defined(__APPLE__)
+			failed = br;
+			close(out);
+#endif
 		}
 		else
 			failed = -1;
+#if defined(__unix__) || defined(__APPLE__)
+		close(in);
+#else
 		fclose(fin);
+#endif
 	}
 	else
 		failed = -1;
