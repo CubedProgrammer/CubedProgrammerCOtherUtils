@@ -426,20 +426,21 @@ int cpcou_copy_file(const char *from, const char *to)
 	return CopyFile(from, to, FALSE) ? 0 : 1;
 #else
 	int failed = 0;
-	size_t size = cpcou_file_size(from);
+	size_t bufsz = 1048576;
 	FILE *fin = fopen(from, "rb");
 	if(fin != NULL)
 	{
 		FILE* fout = fopen(to, "wb");
 		if(fout != NULL)
 		{
-			char *cbuf = malloc(size);
-			fread(cbuf, sizeof(char), size, fin);
-			size_t r = fwrite(cbuf, sizeof(char), size, fin);
+			void *cbuf = malloc(bufsz);
+			size_t br = 1, r;
+			for(r = 0; br > 0; r += br)
+				fwrite(cbuf, sizeof(char), br = fread(cbuf, sizeof(char), bufsz, fin), fin);
+			failed = ferror(fin) || ferror(fout);
+			failed *= -1;
 			fclose(fout);
 			free(cbuf);
-			failed = r != size;
-			failed *= -1;
 		}
 		else
 			failed = -1;
