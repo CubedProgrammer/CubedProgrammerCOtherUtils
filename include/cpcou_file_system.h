@@ -7,7 +7,9 @@
 #ifdef _WIN32
 #define MAX_PATH_LEN 260
 #else
+#include<dirent.h>
 #include<limits.h>
+#include<sys/types.h>
 #define MAX_PATH_LEN PATH_MAX
 #endif
 
@@ -31,6 +33,40 @@ typedef struct cpcou_file_info
  * Root directory, it has no parent
  */
 extern const char cpcou_root_dir[];
+
+struct cpcou_dir_iter
+{
+#ifndef _WIN32
+	DIR *fh;
+	struct dirent *en;
+#endif
+};
+
+/**
+ * Initializes an iterator to specified directory
+ * This iterator is immediately ready for use
+ * Returns zero on success
+ */
+int cpcou_dir_iter_begin(struct cpcou_dir_iter *iter, const char *dir);
+
+/**
+ * Moves iterator to the next entry
+ * Returns zero on success
+ */
+int cpcou_dir_iter_next(struct cpcou_dir_iter *iter);
+
+/**
+ * Gets the name of the current entry of the iterator
+ * Stores the name in buf as a null-terminated string
+ * Returns the number of bytes written to buf, or -1 on failure.
+ */
+int cpcou_dir_iter_get(const struct cpcou_dir_iter *iter, char *buf);
+
+/**
+ * Returns one if the iterator does not point to an entry, zero otherwise
+ * After calling the cpcou_dir_iter_next function on an iterator with the final entry, this will return one
+ */
+int cpcou_dir_iter_ended(const struct cpcou_dir_iter *iter);
 
 /**
  * Gets what is inside a folder, returned pointer will be heap allocated

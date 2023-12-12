@@ -12,6 +12,7 @@
 #include<shlwapi.h>
 #include<sys/utime.h>
 #endif
+#include<errno.h>
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
@@ -27,6 +28,68 @@ const char cpcou_root_dir[]="/";
 #else
 const char cpcou_root_dir[]="C:\\";
 #endif
+
+/**
+ * Initializes an iterator to specified directory
+ * This iterator is immediately ready for use
+ * Returns zero on success
+ */
+int cpcou_dir_iter_begin(struct cpcou_dir_iter *iter, const char *dir)
+{
+#ifndef _WIN32
+	iter->fh = opendir(dir);
+	if(iter->fh == NULL)
+		return-1;
+	else
+	{
+		iter->en = readdir(iter->fh);
+		return 0;
+	}
+#endif
+}
+
+/**
+ * Moves iterator to the next entry
+ * Returns zero on success
+ */
+int cpcou_dir_iter_next(struct cpcou_dir_iter *iter)
+{
+#ifndef _WIN32
+	errno = 0;
+	iter->en = readdir(iter->fh);
+	return(errno != 0) * -1;
+#endif
+}
+
+/**
+ * Gets the name of the current entry of the iterator
+ * Stores the name in buf as a null-terminated string
+ * Returns the number of bytes written to buf, or -1 on failure.
+ */
+int cpcou_dir_iter_get(const struct cpcou_dir_iter *iter, char *buf)
+{
+#ifndef _WIN32
+	if(iter->en == NULL)
+		return-1;
+	else
+	{
+		size_t len = strlen(iter->en->d_name) + 1;
+		memcpy(buf, iter->en->d_name, len);
+		return len;
+	}
+#endif
+}
+
+/**
+ * Returns one if the iterator does not point to an entry, zero otherwise
+ * After calling the cpcou_dir_iter_next function on an iterator with the final entry, this will return one
+ */
+int cpcou_dir_iter_ended(const struct cpcou_dir_iter *iter)
+{
+#ifndef _WIN32
+	return iter->en == NULL;
+#endif
+}
 
 /**
  * Gets what is inside a folder, returned pointer will be heap allocated
