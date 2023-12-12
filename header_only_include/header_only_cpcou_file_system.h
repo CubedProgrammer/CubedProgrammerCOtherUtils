@@ -41,10 +41,7 @@ int cpcou_dir_iter_begin(struct cpcou_dir_iter *iter, const char *dir)
 	if(iter->fh == NULL)
 		return-1;
 	else
-	{
-		iter->en = readdir(iter->fh);
-		return 0;
-	}
+		return cpcou_dir_iter_next(iter);
 #endif
 }
 
@@ -88,6 +85,17 @@ int cpcou_dir_iter_ended(const struct cpcou_dir_iter *iter)
 {
 #ifndef _WIN32
 	return iter->en == NULL;
+#endif
+}
+
+/**
+ * Frees resource used by iterator
+ */
+void cpcou_dir_iter_destroy(struct cpcou_dir_iter *iter)
+{
+#ifndef _WIN32
+	if(iter->fh != NULL)
+		closedir(iter->fh);
 #endif
 }
 

@@ -69,6 +69,11 @@ int cpcou_dir_iter_get(const struct cpcou_dir_iter *iter, char *buf);
 int cpcou_dir_iter_ended(const struct cpcou_dir_iter *iter);
 
 /**
+ * Frees resource used by iterator
+ */
+void cpcou_dir_iter_destroy(struct cpcou_dir_iter *iter);
+
+/**
  * Gets what is inside a folder, returned pointer will be heap allocated
  * So are pointers pointed to by the returned pointer
  * The last string in the array of strings will be NULL;
