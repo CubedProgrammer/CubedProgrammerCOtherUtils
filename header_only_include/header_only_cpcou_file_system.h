@@ -54,6 +54,12 @@ int cpcou_dir_iter_next(struct cpcou_dir_iter *iter)
 #ifndef _WIN32
 	errno = 0;
 	iter->en = readdir(iter->fh);
+	char selfparent = iter->en != NULL && (strcmp(iter->en->d_name, "..") == 0 || strcmp(iter->en->d_name, ".") == 0);
+	while(errno == 0 && selfparent)
+	{
+		iter->en = readdir(iter->fh);
+		selfparent = iter->en != NULL && (strcmp(iter->en->d_name, "..") == 0 || strcmp(iter->en->d_name, ".") == 0);
+	}
 	return(errno != 0) * -1;
 #endif
 }
