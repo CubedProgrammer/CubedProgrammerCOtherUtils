@@ -39,6 +39,10 @@ struct cpcou_dir_iter
 #ifndef _WIN32
 	DIR *fh;
 	struct dirent *en;
+#else
+	HANDLE fh;
+	WIN32_FIND_DATA dat;
+	int more;
 #endif
 };
 

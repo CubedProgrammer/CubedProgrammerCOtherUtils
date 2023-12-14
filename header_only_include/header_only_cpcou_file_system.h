@@ -42,6 +42,15 @@ int cpcou_dir_iter_begin(struct cpcou_dir_iter *iter, const char *dir)
 		return-1;
 	else
 		return cpcou_dir_iter_next(iter);
+#else
+	size_t dirlen = strlen(dir);
+	char *searchstr = malloc(dirlen + 3);
+	memcpy(searchdir, dir, dirlen);
+	memcpy(searchdir + dirlen, "\\*", 3);
+	iter->fh = FindFirstFileA(searchstr, &iter->dat);
+	free(searchstr);
+	iter->more = iter->fh != INVALID_HANDLE_VALUE;
+	return!iter->more;
 #endif
 }
 
@@ -61,6 +70,8 @@ int cpcou_dir_iter_next(struct cpcou_dir_iter *iter)
 		selfparent = iter->en != NULL && (strcmp(iter->en->d_name, "..") == 0 || strcmp(iter->en->d_name, ".") == 0);
 	}
 	return(errno != 0) * -1;
+#else
+	return(iter->more = FindNextFileA(iter->fh, &iter->dat)) ? 0 : -1;
 #endif
 }
 
@@ -80,6 +91,15 @@ int cpcou_dir_iter_get(const struct cpcou_dir_iter *iter, char *buf)
 		memcpy(buf, iter->en->d_name, len);
 		return len;
 	}
+#else
+	if(iter->more)
+	{
+		size_t len = strlen(iter->dat.cFileName) + 1;
+		memcpy(buf, iter->dat.cFileName, len);
+		return len;
+	}
+	else
+		return-1;
 #endif
 }
 
@@ -91,6 +111,8 @@ int cpcou_dir_iter_ended(const struct cpcou_dir_iter *iter)
 {
 #ifndef _WIN32
 	return iter->en == NULL;
+#else
+	return iter->more;
 #endif
 }
 
@@ -102,6 +124,9 @@ void cpcou_dir_iter_destroy(struct cpcou_dir_iter *iter)
 #ifndef _WIN32
 	if(iter->fh != NULL)
 		closedir(iter->fh);
+#else
+	if(iter->fh != INVALID_HANDLE_VALUE)
+		FindClose(iter->fh);
 #endif
 }
 
